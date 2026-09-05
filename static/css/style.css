@@ -145,6 +145,12 @@ body {
     text-transform: uppercase;
 }
 
+/* each word gets its own line, so re-randomising the letters can never
+   flip "Kemas / Xavier" onto a single line */
+.hero-identity h1 .word {
+    display: block;
+}
+
 .bio {
     color: var(--ink);
     max-width: 480px;
@@ -231,31 +237,47 @@ body {
     font-size: 0.85rem;
 }
 
-/* ===== Social icon tooltip: ink-splat reveal ===== */
+/* ===== Social icon tooltip: ink-splat reveal (outline only, no box) ===== */
 .social-tip {
     position: absolute;
     top: -2.9rem;
     left: 50%;
     z-index: 20;
     padding: 0.5rem 1rem;
-    background: var(--paper);
-    border: 2px solid var(--ink);
     color: var(--ink);
     font-weight: 700;
     font-size: 0.85rem;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    box-shadow: 3px 3px 0 rgba(28, 25, 23, 0.25);
     transform: translate(-50%, 6px) scale(0.2);
-    clip-path: polygon(50% 48%, 51% 49%, 52% 50%, 51% 51%, 50% 52%, 49% 51%, 48% 50%, 49% 49%, 50% 48%, 51% 49%, 50% 50%, 49% 49%);
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                clip-path 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                 opacity 0.15s ease-out;
 }
 
 .social-tip.is-visible {
     opacity: 1;
+}
+
+.social-tip-splat {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.social-tip-splat path {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.social-tip-label {
+    position: relative;
+    z-index: 1;
 }
 
 /* ===== Ransom-note mixed-font effect ===== */
@@ -265,6 +287,7 @@ body {
 
 .ransom-text .word {
     display: inline-block;
+    white-space: nowrap;
 }
 
 .ransom-text span.letter {
@@ -301,7 +324,254 @@ body {
 .ink-blue  { color: var(--blue); }
 .ink-slate { color: #45607a; }
 
+/* ===== Long-scroll sections: editorial asymmetry ===== */
+html {
+    scroll-behavior: smooth;
+}
+
+.section {
+    padding: 4.5rem 0;
+}
+
+.section-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* reserve enough height that the floating logos never spill into the next section */
+#education .section-grid { min-height: 19rem; }
+#projects .section-grid { min-height: 26rem; }
+#experience .section-grid { min-height: 25rem; }
+
+/* placement is authored once — same on every load, never random */
+#about .section-block      { grid-column: 2 / 8; }
+#education .section-block  { grid-column: 7 / 12; }
+#projects .section-block   { grid-column: 1 / 11; }
+#experience .section-block { grid-column: 4 / 11; }
+#skills .section-block     { grid-column: 2 / 7; }
+
+.section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+}
+
+.section-title {
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    line-height: 1;
+    text-transform: uppercase;
+    margin-bottom: 1.75rem;
+}
+
+.section-lead {
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.entry {
+    margin-top: 2.75rem;
+}
+
+.entry:first-of-type {
+    margin-top: 0;
+}
+
+/* logos float free in the empty space the asymmetry leaves behind —
+   they belong to their section, but are not tied to any single entry */
+.section-logo {
+    position: absolute;
+    display: block;
+    object-fit: contain;
+    background-color: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 0.4rem;
+}
+
+/* stickers: no frame, so they read as slapped on rather than catalogued
+   like the institutional logos above */
+.section-sticker {
+    position: absolute;
+    display: block;
+    object-fit: contain;
+}
+
+.sticker-veto-1 { width: 5.5rem;  right: 1%; top: 0.5rem; transform: rotate(-8deg); }
+.sticker-veto-2 { width: 4.25rem; right: 9%; top: 11rem;  transform: rotate(7deg); }
+.sticker-veto-3 { width: 6rem;    right: 0;  top: 19rem;  transform: rotate(-4deg); }
+
+/* placement authored once — identical on every load, never random */
+.logo-ui       { width: 7rem;    left: 4%;  top: 0;      transform: rotate(-7deg); }
+.logo-alazhar  { width: 4.5rem;  left: 30%; top: 12rem;  transform: rotate(6deg); }
+.logo-bem      { width: 7.75rem; left: 1%;  top: 1.5rem; transform: rotate(4deg); }
+.logo-compfest { width: 5.25rem; left: 15%; top: 17rem;  transform: rotate(-9deg); }
+
+.entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.entry-title {
+    font-size: 1.05rem;
+    line-height: 1.3;
+}
+
+.entry-meta {
+    font-size: 0.8rem;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.entry-sub {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.entry-list {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+}
+
+.entry-list li {
+    position: relative;
+    padding-left: 1.2rem;
+    font-weight: 400;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.entry-list li::before {
+    content: "\2014";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+}
+
+.entry-links {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.entry-links a {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 2px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.entry-links a:hover {
+    color: var(--accent);
+    border-color: var(--ink);
+}
+
+.tag-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border: 2px solid var(--ink);
+    background-color: var(--paper);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tag:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+}
+
+/* asymmetry is a desktop treatment — collapse to one column below this */
+@media (max-width: 900px) {
+    .section-block {
+        grid-column: 1 / -1 !important;
+    }
+
+    /* no empty space left to float in — logos rejoin the flow, but stay scattered */
+    #education .section-grid,
+    #projects .section-grid,
+    #experience .section-grid {
+        min-height: 0;
+    }
+
+    .section-logo,
+    .section-sticker {
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+    }
+
+    .sticker-veto-1 { grid-column: 1 / 6;  justify-self: start;  width: 5rem;    margin-top: 2rem; }
+    .sticker-veto-2 { grid-column: 6 / 10; justify-self: center; width: 3.75rem; margin-top: 3.5rem; }
+    .sticker-veto-3 { grid-column: 10 / 13; justify-self: end;   width: 4.5rem;  margin-top: 1.5rem; }
+
+    .logo-ui       { grid-column: 1 / 7;  justify-self: start;  width: 5.25rem; margin-top: 2rem; }
+    .logo-alazhar  { grid-column: 8 / 13; justify-self: end;    width: 4rem;    margin-top: 4.25rem; }
+    .logo-bem      { grid-column: 2 / 8;  justify-self: center; width: 5.5rem;  margin-top: 2.25rem; }
+    .logo-compfest { grid-column: 9 / 13; justify-self: end;    width: 4.25rem; margin-top: 4.75rem; }
+
+    .site-header nav {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
 @media (max-width: 600px) {
+    /* fixed-width brand column: the ransom letters re-randomise to widths
+       between 56px and 92px, and a flexible column let that shove the nav
+       around. A fixed track keeps the nav anchored no matter what renders. */
+    .site-header .container {
+        display: grid;
+        grid-template-columns: 7rem 1fr;
+        align-items: start;
+        gap: 0.75rem;
+    }
+
+    .site-header nav {
+        justify-content: flex-start;
+        gap: 0.35rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .site-header nav a {
+        font-size: 0.85rem;
+    }
+
+    .section {
+        padding: 3rem 0;
+    }
+
+    /* hero sat ~90px below the nav on phones — tighten it up */
+    .hero {
+        padding: 1.25rem 0 3rem;
+    }
+
     .hero-grid {
         grid-template-columns: 1fr;
         grid-template-areas:
@@ -317,4 +587,5 @@ body {
     .social-links {
         justify-content: flex-start;
     }
+
 }

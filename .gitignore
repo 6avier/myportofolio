@@ -27,6 +27,11 @@ media/
 *.sublime-project
 *.sublime-workspace
 
+# Claude Code
+.claude/
+CLAUDE.md
+.mcp.json
+
 # macOS
 .DS_Store
 
