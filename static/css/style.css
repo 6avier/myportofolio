@@ -4,35 +4,82 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: "Revista";
+    src: url("/static/fonts/REVISTA.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MagazineLetter";
+    src: url("/static/fonts/MagazineLetterByBrntlbrnl-Regular.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "ProblemChild";
+    src: url("/static/fonts/Problem-Child.otf") format("opentype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Gorillaz";
+    src: url("/static/fonts/gorillaz_1.ttf") format("truetype");
+    font-display: swap;
+}
+
+/* self-hosted fallbacks for the Mac-only system fonts (Phosphate/Avenir) */
+@font-face {
+    font-family: "Bungee";
+    src: url("/static/fonts/Bungee-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Poppins ExtraBold";
+    src: url("/static/fonts/Poppins-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --ink: #1c1917;
     --paper: #faf6f0;
+    --paper-dark: #f0e6d4;
     --accent: #d95d39;
     --accent-dark: #a8442a;
+    --navy: #1e3a5f;
+    --navy-deep: #16293f;
+    --blue: #3a6ea5;
+    --sky: #9cc3de;
     --line: #e3d9c9;
     --text-muted: #6b6459;
     --radius: 4px;
 }
 
 body {
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
     color: var(--ink);
     background-color: var(--paper);
+    background-image: url("/static/img/seamless_paper_texture.png");
+    background-repeat: repeat;
     line-height: 1.6;
 }
 
-h1, .brand {
-    font-family: "Space Grotesk", -apple-system, sans-serif;
+.brand {
+    font-family: "Revista", -apple-system, sans-serif;
 }
 
 .container {
     max-width: 960px;
     margin: 0 auto;
     padding: 0 1.5rem;
-}
-
-.site-header {
-    border-bottom: 1px solid var(--line);
 }
 
 .site-header .container {
@@ -43,10 +90,11 @@ h1, .brand {
 }
 
 .brand {
-    font-size: 1.3rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--ink);
     text-decoration: none;
+    letter-spacing: 0.02em;
 }
 
 .site-header nav {
@@ -82,10 +130,11 @@ h1, .brand {
 }
 
 .hero-kicker {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--accent-dark);
+    color: var(--ink);
     font-weight: 700;
     margin-bottom: 0.75rem;
 }
@@ -93,10 +142,11 @@ h1, .brand {
 .hero-identity h1 {
     font-size: clamp(3rem, 7vw, 5rem);
     line-height: 0.95;
+    text-transform: uppercase;
 }
 
 .bio {
-    color: var(--text-muted);
+    color: var(--ink);
     max-width: 480px;
     margin-bottom: 1.5rem;
 }
@@ -111,70 +161,145 @@ h1, .brand {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-muted);
+    color: var(--ink);
     margin-bottom: 0.15rem;
-}
-
-.meta-row dd {
-    font-weight: 600;
 }
 
 .social-links {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 1.5rem;
     flex-wrap: wrap;
-}
-
-.social-link {
-    display: inline-block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    color: var(--paper);
-    background-color: var(--ink);
-    border-radius: var(--radius);
-    padding: 0.5rem 1.1rem;
-    transition: background-color 0.2s ease;
-}
-
-.social-link:hover {
-    background-color: var(--accent);
+    margin-top: 3.5rem;
 }
 
 .hero-photo {
     grid-area: photo;
     align-self: center;
-    position: relative;
 }
 
-.photo-block {
-    position: absolute;
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 100%;
-    height: 100%;
-    background-color: var(--accent);
-    border-radius: var(--radius);
-    z-index: 0;
+.photo-frame {
+    border: 2px solid var(--ink);
+    padding: 0.75rem;
+    background-color: var(--paper);
 }
 
 .avatar {
-    position: relative;
-    z-index: 1;
     display: block;
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: var(--radius);
-    border: 3px solid var(--ink);
+}
+
+.placard {
+    display: block;
+    width: 5.5rem;
+    margin-top: 1.25rem;
+    margin-left: 2.5rem;
+    background-color: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 0.3rem 0.4rem;
+}
+
+.placard-name {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 0.6rem;
+    color: var(--ink);
+}
+
+.placard-title {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 0.55rem;
+    color: var(--ink);
+    margin-top: 0.1rem;
+}
+
+.placard-medium {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: italic;
+    font-size: 0.5rem;
+    color: var(--ink);
+    margin-top: 0.1rem;
 }
 
 .site-footer {
     padding: 1.5rem;
     color: var(--text-muted);
     font-size: 0.85rem;
-    border-top: 1px solid var(--line);
 }
+
+/* ===== Social icon tooltip: ink-splat reveal ===== */
+.social-tip {
+    position: absolute;
+    top: -2.9rem;
+    left: 50%;
+    z-index: 20;
+    padding: 0.5rem 1rem;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 3px 3px 0 rgba(28, 25, 23, 0.25);
+    transform: translate(-50%, 6px) scale(0.2);
+    clip-path: polygon(50% 48%, 51% 49%, 52% 50%, 51% 51%, 50% 52%, 49% 51%, 48% 50%, 49% 49%, 50% 48%, 51% 49%, 50% 50%, 49% 49%);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                clip-path 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.15s ease-out;
+}
+
+.social-tip.is-visible {
+    opacity: 1;
+}
+
+/* ===== Ransom-note mixed-font effect ===== */
+.ransom-text {
+    display: inline-block;
+}
+
+.ransom-text .word {
+    display: inline-block;
+}
+
+.ransom-text span.letter {
+    display: inline-block;
+    position: relative;
+    white-space: pre;
+    cursor: default;
+    transition: transform 0.12s ease-out;
+}
+
+/* font variants each letter can be assigned */
+.rf-1 { font-family: "Phosphate Solid", "Phosphate", "Bungee", sans-serif; }
+.rf-2 { font-family: "MagazineLetter", serif; }
+.rf-3 { font-family: "ProblemChild", cursive; }
+.rf-4 { font-family: "Revista", serif; }
+.rf-5 { font-family: "Gorillaz", sans-serif; }
+.rf-6 { font-family: "Times New Roman", Times, serif; font-style: italic; font-weight: 700; }
+.rf-7 { font-family: "Courier New", monospace; font-weight: 700; }
+.rf-8 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; }
+.rf-9 { font-family: "Helvetica Neue", Arial, sans-serif; font-weight: 900; }
+.rf-10 { font-family: "Avenir Heavy", "Avenir Next", "Avenir", "Poppins ExtraBold", sans-serif; font-weight: 800; }
+
+/* cut-paper chip backgrounds (used by .ransom-chips) */
+.chip-ink     { background: var(--ink);       color: var(--paper);     padding: 0.02em 0.14em; box-shadow: 3px 3px 0 rgba(28,25,23,0.15); }
+.chip-navy    { background: var(--navy);      color: var(--paper);     padding: 0.02em 0.14em; box-shadow: 3px 3px 0 rgba(28,25,23,0.15); }
+.chip-blue    { background: var(--blue);      color: var(--paper);     padding: 0.02em 0.14em; box-shadow: 3px 3px 0 rgba(28,25,23,0.15); }
+.chip-sky     { background: var(--sky);       color: var(--navy-deep); padding: 0.02em 0.14em; box-shadow: 3px 3px 0 rgba(28,25,23,0.15); }
+.chip-paper   { background: var(--paper-dark); color: var(--ink);      padding: 0.02em 0.14em; box-shadow: 3px 3px 0 rgba(28,25,23,0.15); border: 1px solid #d8cbb0; }
+.chip-outline { color: var(--paper); -webkit-text-stroke: 1.3px var(--navy); }
+
+/* minimal ink colors, no background (used by .ransom-ink) */
+.ink-black { color: var(--ink); }
+.ink-navy  { color: var(--navy); }
+.ink-blue  { color: var(--blue); }
+.ink-slate { color: #45607a; }
 
 @media (max-width: 600px) {
     .hero-grid {
