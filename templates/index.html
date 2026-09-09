@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xavier - Portofolio</title>
+    <title>{{ name }} - Portofolio</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="#profile" class="brand ransom-text ransom-chips">KXA</a>
+            <a href="{% url 'main:show_main' %}" class="brand ransom-text ransom-chips">KXA</a>
             <nav>
-                <a href="#profile">Profile</a>
-                <a href="#about">About</a>
-                <a href="#education">Education</a>
-                <a href="#projects">Projects</a>
-                <a href="#experience">Experience</a>
-                <a href="#skills">Skills</a>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_main' %}#about">About</a>
+                <a href="{% url 'main:show_main' %}#education">Education</a>
+                <a href="{% url 'main:show_main' %}#projects">Projects</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_main' %}#skills">Skills</a>
             </nav>
         </div>
     </header>
@@ -26,12 +26,12 @@
         <section class="hero" id="profile">
             <div class="container hero-grid">
                 <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1 class="ransom-text ransom-chips">Kemas Xavier</h1>
+                    <p class="hero-kicker">Information Systems &middot; Universitas Indonesia</p>
+                    <h1 class="ransom-text ransom-chips">{{ name }}</h1>
                 </div>
                 <div class="hero-photo">
                     <div class="photo-frame">
-                        <img class="avatar" src="/static/img/me.jpg" alt="Photo of Kemas Xavier">
+                        <img class="avatar" src="/static/img/me.jpg" alt="Photo of {{ name }}">
                     </div>
                     <div class="placard">
                         <p class="placard-name">me</p>
@@ -40,15 +40,15 @@
                     </div>
                 </div>
                 <div class="hero-details">
-                    <p class="bio">hi im an information systems student at csui nice too meeeet ya.</p>
+                    <p class="bio">{{ bio }}</p>
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>2506656886</dd>
+                            <dd>{{ npm }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
+                            <dd>S{{ study_program }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -166,41 +166,7 @@
             </div>
         </section>
 
-        <section class="section" id="experience">
-            <div class="section-grid">
-                <div class="section-block">
-                    <p class="section-label">04 &mdash; Experience</p>
-                    <h2 class="section-title ransom-text ransom-ink">Experience</h2>
 
-                    <article class="entry">
-                        <div class="entry-head">
-                            <h3 class="entry-title">Human Resource Development, BEM Fasilkom UI</h3>
-                            <span class="entry-meta">2026</span>
-                        </div>
-                        <p class="entry-sub">Staff &middot; Universitas Indonesia, Depok</p>
-                        <ul class="entry-list">
-                            <li>Project Manager (PIC) of GrowUp 2026, connecting 100+ students across 11 divisions with industry professionals and alumni.</li>
-                            <li>HR liaison to the Academic Division, aligning staffing across 8 concurrent programs.</li>
-                        </ul>
-                    </article>
-
-                    <article class="entry">
-                        <div class="entry-head">
-                            <h3 class="entry-title">Digital Marketing, COMPFEST 18</h3>
-                            <span class="entry-meta">2026</span>
-                        </div>
-                        <p class="entry-sub">Staff &middot; Universitas Indonesia, Depok</p>
-                        <ul class="entry-list">
-                            <li>Produced and directed short-form video campaigns for Indonesia's largest student-led tech festival, contributing to a portfolio generating 100K+ views.</li>
-                            <li>Led real-time live reporting across Instagram and Twitter for major COMPFEST events.</li>
-                        </ul>
-                    </article>
-                </div>
-
-                <img class="section-logo logo-bem" src="/static/img/BEM.jpg" alt="BEM Fasilkom UI logo">
-                <img class="section-logo logo-compfest" src="/static/img/COMPFEST.jpg" alt="COMPFEST 18 logo">
-            </div>
-        </section>
 
         <section class="section" id="skills">
             <div class="section-grid">
@@ -235,7 +201,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 XAV. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
 
