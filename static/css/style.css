@@ -615,10 +615,24 @@ html {
 }
 
 .experience-card {
+    position: relative;
     padding: 1.25rem;
     background-color: #fff;
     border: 1px solid var(--line);
     border-radius: var(--radius);
+}
+
+.experience-thumb {
+    position: absolute;
+    top: -1.25rem;
+    right: 1rem;
+    width: 5rem;
+    height: 5rem;
+    object-fit: cover;
+    background-color: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 0.3rem;
+    transform: rotate(-6deg);
 }
 
 .experience-category {

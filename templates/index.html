@@ -14,7 +14,7 @@
             <nav>
                 <a href="{% url 'main:show_main' %}">Profile</a>
                 <a href="{% url 'main:show_main' %}#about">About</a>
-                <a href="{% url 'main:show_main' %}#education">Education</a>
+                <a href="{% url 'main:show_education' %}">Education</a>
                 <a href="{% url 'main:show_main' %}#projects">Projects</a>
                 <a href="{% url 'main:show_experience' %}">Experience</a>
                 <a href="{% url 'main:show_main' %}#skills">Skills</a>
@@ -48,7 +48,7 @@
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S{{ study_program }}</dd>
+                            <dd>{{ study_program }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -104,34 +104,6 @@
                     <h2 class="section-title ransom-text ransom-ink">Who I am</h2>
                     <p class="section-lead">I am a motivated and hardworking individual with a passion for technology, problem-solving, and continuous development. My organizational and academic experiences have strengthened my teamwork, adaptability, and critical thinking skills. I am eager to keep improving myself, embrace new challenges, and contribute meaningfully to future opportunities while expanding my knowledge and professional growth.</p>
                 </div>
-            </div>
-        </section>
-
-        <section class="section" id="education">
-            <div class="section-grid">
-                <div class="section-block">
-                    <p class="section-label">02 &mdash; Education</p>
-                    <h2 class="section-title ransom-text ransom-ink">Education</h2>
-
-                    <article class="entry">
-                        <div class="entry-head">
-                            <h3 class="entry-title">Universitas Indonesia</h3>
-                            <span class="entry-meta">2025 &ndash; Current</span>
-                        </div>
-                        <p class="entry-sub">Information Systems, Faculty of Computer Science</p>
-                    </article>
-
-                    <article class="entry">
-                        <div class="entry-head">
-                            <h3 class="entry-title">SMA Islam Al-Azhar 3</h3>
-                            <span class="entry-meta">2022 &ndash; 2025</span>
-                        </div>
-                        <p class="entry-sub">High School Graduate</p>
-                    </article>
-                </div>
-
-                <img class="section-logo logo-ui" src="/static/img/Pacil.png" alt="Faculty of Computer Science, Universitas Indonesia logo">
-                <img class="section-logo logo-alazhar" src="/static/img/ALPUS3.png" alt="SMA Islam Al-Azhar 3 logo">
             </div>
         </section>
 

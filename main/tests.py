@@ -1,15 +1,20 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from main.models import Experience
+from main.models import Experience, Education
 
 
 class MainTest(TestCase):
     def setUp(self):
         self.experience = Experience.objects.create(
-            title="Asisten Dosen PBP",
-            description="Membantu mahasiswa memahami pengembangan web.",
+            title="Frontend Developer VETO",
+            description="Membangun antarmuka aplikasi compliance logistik.",
             category="part-time",
+        )
+        self.education = Education.objects.create(
+            institution="Universitas Indonesia",
+            program="Information Systems",
+            start_year=2025,
         )
 
     def test_main_url_is_accessible(self):
@@ -24,7 +29,7 @@ class MainTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_experience_model(self):
-        self.assertEqual(str(self.experience), "Asisten Dosen PBP")
+        self.assertEqual(str(self.experience), "Frontend Developer VETO")
         self.assertEqual(self.experience.category, "part-time")
         self.assertTrue(self.experience.is_ongoing)
 
@@ -50,3 +55,24 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Selesai")
         self.assertNotContains(response, "Sedang berlangsung")
+
+    def test_education_page(self):
+        response = self.client.get(reverse("main:show_education"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "education.html")
+        self.assertContains(response, self.education.institution)
+        self.assertContains(response, self.education.program)
+
+    def test_empty_education_page(self):
+        Education.objects.all().delete()
+        response = self.client.get(reverse("main:show_education"))
+        self.assertContains(response, "Belum ada riwayat pendidikan yang ditambahkan.")
+
+    def test_education_ongoing_vs_completed(self):
+        response = self.client.get(reverse("main:show_education"))
+        self.assertContains(response, "2025 - Current")
+
+        self.education.end_year = 2029
+        self.education.save()
+        response = self.client.get(reverse("main:show_education"))
+        self.assertContains(response, "2025 - 2029")

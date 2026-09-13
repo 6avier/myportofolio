@@ -76,3 +76,26 @@ Satu hasil sering saya minta revisi berkali-kali sampai bentuknya sesuai.
 - Perbaikan bug tampilan: navigasi yang bergeser, nama di hero yang kadang
   menempel jadi satu baris, dan jarak berlebih di tampilan mobile.
 - Riset referensi font dan sumber tekstur kertas.
+
+### Tugas 2
+
+1. Ketika pengguna membuka halaman `/education/`, request pertama kali masuk ke `portofolio/urls.py` (urls.py level proyek), yang mengecek prefix URL dan meneruskan request ke `main/urls.py` (urls.py level aplikasi) karena request tersebut cocok dengan include dari app `main`. Di dalam `main/urls.py`, Django mencocokkan path `education/` dengan `path("education/", show_education, name="show_education")`, lalu memanggil fungsi view `show_education` di `main/views.py`. View ini mengambil seluruh data `Education` dari database lewat `Education.objects.all()`, memasukkannya ke dalam sebuah `context` (dictionary), lalu memanggil `render()` dengan template `education.html` dan context tersebut. Django kemudian merender template itu: bagian `{% for education in education_list %}` melakukan iterasi ke setiap object Education dan mengisi HTML dengan data sebenarnya (institution, program, start_year, end_year, logo). Hasil HTML yang sudah jadi ini dikirim balik sebagai response ke browser, dan browser menampilkannya sebagai halaman Education yang dilihat pengguna.
+
+2. Data untuk bagian portofolio baru sebaiknya disimpan di model, bukan ditulis langsung di template, karena template seharusnya hanya bertanggung jawab atas presentasi (tampilan), bukan penyimpanan data. Kalau data di-hardcode di HTML, setiap kali ada perubahan data (misalnya menambah riwayat pendidikan baru atau mengubah tahun kelulusan), saya harus mengedit langsung file template dan melakukan deploy ulang seluruh aplikasi. Dengan menyimpan data di model, saya bisa menambah, mengubah, atau menghapus data lewat Django admin tanpa menyentuh kode sama sekali, sehingga lebih aman dari technical debt dan human error saat mengedit HTML. Ini juga membuat data bisa dipakai ulang di tempat lain (misalnya API atau halaman lain) tanpa duplikasi, dan memisahkan tanggung jawab logika data (model) dari tampilan (template) sesuai prinsip separation of concerns pada pola MVT.
+
+3. `makemigrations` membuat berkas migrasi baru berdasarkan perubahan yang saya buat di `models.py` — ini semacam "rencana perubahan" struktur database dalam bentuk kode Python, tapi belum benar-benar diterapkan ke database. `migrate` menjalankan berkas migrasi tersebut ke database sungguhan, mengeksekusi perintah SQL (CREATE TABLE, ALTER TABLE, dsb.) sehingga struktur database benar-benar berubah sesuai migrasi yang ada. Contoh nyata dari proyek ini: saat saya membuat model `Education` untuk pertama kali, saya menjalankan `makemigrations` untuk menghasilkan file migrasi `0002_education.py`, lalu `migrate` untuk benar-benar membuat tabel `main_education` di `db.sqlite3`. Selanjutnya, saat saya mengubah tipe field `logo` dari `URLField` menjadi `CharField`, saya kembali menjalankan `makemigrations` (menghasilkan `0003_alter_education_logo.py`) dan `migrate` supaya perubahan tipe kolom tersebut diterapkan ke tabel yang sudah ada di database.
+
+### Penggunaan AI
+
+**Tools:** Claude (Claude Code), model Sonnet.
+
+**Strategi prompting:** Saya jelasin requirement-nya, lalu diarahkan
+langkah demi langkah (model, migrasi, view, template, url, navbar, test)
+dan saya yang ngetik sendiri tiap bagian kodenya. Kalau ada error, saya
+kirim pesan errornya dan minta dijelasin penyebabnya.
+
+**Bagian yang dibantu:**
+
+- Perancangan model `Education` dan alur MVT-nya.
+- Debugging error `URLField` dan `IndentationError` di test.
+- Penyusunan unit test untuk halaman `/education/`.
