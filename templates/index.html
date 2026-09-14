@@ -15,9 +15,9 @@
                 <a href="{% url 'main:show_main' %}">Profile</a>
                 <a href="{% url 'main:show_main' %}#about">About</a>
                 <a href="{% url 'main:show_education' %}">Education</a>
-                <a href="{% url 'main:show_main' %}#projects">Projects</a>
+                <a href="{% url 'main:show_projects' %}">Projects</a>
                 <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_main' %}#skills">Skills</a>
+                <a href="{% url 'main:show_skills' %}">Skills</a>
             </nav>
         </div>
     </header>
@@ -107,68 +107,6 @@
             </div>
         </section>
 
-        <section class="section" id="projects">
-            <div class="section-grid">
-                <div class="section-block">
-                    <p class="section-label">03 &mdash; Projects</p>
-                    <h2 class="section-title ransom-text ransom-ink">Projects</h2>
-
-                    <article class="entry">
-                        <div class="entry-head">
-                            <h3 class="entry-title">VETO &mdash; RISTEK Hackathon 2026</h3>
-                            <span class="entry-meta">2026</span>
-                        </div>
-                        <p class="entry-sub">Frontend Developer &middot; Top 10 Finalist (7th of 37 teams)</p>
-                        <ul class="entry-list">
-                            <li>An API-first compliance middleware for Indonesian freight logistics that validates truck dispatches against ODOL (Over Dimension Over Load) regulations in real time, blocking non-compliant shipments before they leave the loading dock.</li>
-                            <li>Independently built VETO's entire frontend (Vite, React, Tailwind CSS, Axios), architecting the UI/UX for all four core interfaces within a 4-day build sprint.</li>
-                            <li>Implemented an OpenAI LLM-powered rule extraction feature, converting regulatory documents into structured, human-approvable digital rules.</li>
-                            <li>Placed 7th out of 37 teams, advancing as a Top 10 finalist at RISTEK Hackathon 2026's Grand Final.</li>
-                        </ul>
-                        <div class="entry-links">
-                            <a href="https://github.com/6avier/veto" target="_blank" rel="noopener noreferrer">GitHub</a>
-                            <a href="https://veto-gold.vercel.app" target="_blank" rel="noopener noreferrer">Live Demo</a>
-                        </div>
-                    </article>
-                </div>
-
-                <img class="section-sticker sticker-veto-1" src="/static/img/vetosticker1.png" alt="VETO project sticker">
-                <img class="section-sticker sticker-veto-2" src="/static/img/vetosticker2.png" alt="VETO project sticker">
-                <img class="section-sticker sticker-veto-3" src="/static/img/vetosticker3.png" alt="VETO project sticker">
-            </div>
-        </section>
-
-
-
-        <section class="section" id="skills">
-            <div class="section-grid">
-                <div class="section-block">
-                    <p class="section-label">05 &mdash; Skills</p>
-                    <h2 class="section-title ransom-text ransom-ink">Skills</h2>
-
-                    <ul class="tag-list">
-                        <li class="tag">Project Management</li>
-                        <li class="tag">Event Planning &amp; Coordination</li>
-                        <li class="tag">AI-Assisted Development</li>
-                        <li class="tag">Git &amp; GitHub</li>
-                        <li class="tag">Video Production &amp; Editing (Adobe Premiere Pro)</li>
-                        <li class="tag">Content Creation &amp; Social Media Management</li>
-                        <li class="tag">Stakeholder Management</li>
-                        <li class="tag">Google Workspace (Docs, Sheets, Drive)</li>
-                        <li class="tag">Canva (basic)</li>
-                        <li class="tag">Python (basic)</li>
-                        <li class="tag">Figma (basic)</li>
-                        <li class="tag">Problem Solving</li>
-                        <li class="tag">Communication</li>
-                    </ul>
-
-                    <div class="entry">
-                        <h3 class="entry-title">Languages</h3>
-                        <p class="entry-sub">Bahasa Indonesia (Fluent) &middot; English (Fluent, TOEFL ITP 620)</p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer class="site-footer">

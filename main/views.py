@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from main.models import Experience, Education
+from main.models import Experience, Education, Project, Skill
 
 
 def show_main(request):
@@ -25,3 +25,18 @@ def show_education(request):
         "education_list": Education.objects.all(),
     }
     return render(request, "education.html", context)
+
+def show_projects(request):
+    context = {
+        "name": "Kemas Xavier",
+        "project_list": Project.objects.all(),
+    }
+    return render(request, "projects.html", context)
+
+
+def show_skills(request):
+    context = {
+        "name": "Kemas Xavier",
+        "skill_list": Skill.objects.all(),
+    }
+    return render(request, "skills.html", context)

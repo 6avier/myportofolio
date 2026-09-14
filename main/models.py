@@ -35,3 +35,31 @@ class Education(models.Model):
     logo = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         return self.institution
+
+
+class Project(models.Model):
+    title = models.CharField(max_length=255)
+    role = models.CharField(max_length=255)
+    description = models.TextField()
+    year = models.CharField(max_length=20)
+    github_url = models.URLField(blank=True, null=True)
+    demo_url = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Skill(models.Model):
+    SKILL_CATEGORIES = [
+        ('technical', 'Technical'),
+        ('soft', 'Soft Skill'),
+        ('tool', 'Tool'),
+        ('language', 'Language'),
+    ]
+
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=20, choices=SKILL_CATEGORIES, default='technical')
+    proficiency = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
