@@ -1,61 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Education - {{ name }}</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand ransom-text ransom-chips">KXA</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_main' %}#about">About</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-                <a href="{% url 'main:show_projects' %}">Projects</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_skills' %}">Skills</a>
-            </nav>
+{% extends 'base.html' %}
+
+{% block title %}Education - {{ name }}{% endblock %}
+
+{% block content %}
+<section class="experience-section" id="education">
+    <div class="container">
+        <h1 class="section-title ransom-text ransom-ink">Education</h1>
+        <div class="experience-grid">
+            {% for education in education_list %}
+            <article class="experience-card">
+                {% if education.logo %}
+                <img class="experience-thumb" src="{{ education.logo }}" alt="{{ education.institution }} logo">
+                {% endif %}
+                <h2>{{ education.institution }}</h2>
+                <p class="experience-description">{{ education.program }}</p>
+                {% if education.end_year %}
+                <p class="experience-status">{{ education.start_year }} - {{ education.end_year }}</p>
+                {% else %}
+                <p class="experience-status">{{ education.start_year }} - Current</p>
+                {% endif %}
+            </article>
+            {% empty %}
+            <p class="empty-state">Belum ada riwayat pendidikan yang ditambahkan.</p>
+            {% endfor %}
         </div>
-    </header>
-
-    <main>
-    <section class="experience-section" id="education">
-        <div class="container">
-            <h1 class="section-title ransom-text ransom-ink">Education</h1>
-
-            <div class="experience-grid">
-                {% for education in education_list %}
-                <article class="experience-card">
-                    {% if education.logo %}
-                    <img class="experience-thumb" src="{{ education.logo }}" alt="{{ education.institution }} logo">
-                    {% endif %}
-                    <h2>{{ education.institution }}</h2>
-                    <p class="experience-description">{{ education.program }}</p>
-                    {% if education.end_year %}
-                    <p class="experience-status">{{ education.start_year }} - {{ education.end_year }}</p>
-                    {% else %}
-                    <p class="experience-status">{{ education.start_year }} - Current</p>
-                    {% endif %}
-                </article>
-                {% empty %}
-                <p class="empty-state">Belum ada riwayat pendidikan yang ditambahkan.</p>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-</main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-
-    <script src="/static/js/ransom.js"></script>
-    <script src="/static/js/social-splat.js"></script>
-</body>
-</html>
+    </div>
+</section>
+{% endblock %}

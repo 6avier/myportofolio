@@ -657,3 +657,240 @@ html {
     font-size: 0.85rem;
     font-weight: 600;
 }
+
+/* Uiverse.io by cssbuttons-io — "slippery-jellyfish-67" button, adapted for + Add Project */
+.btn-jelly {
+    --color: #560bad;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    display: inline-block;
+    padding: 0 1.6em;
+    height: 2.6em;
+    line-height: 2.5em;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid var(--color);
+    transition: color 0.5s;
+    z-index: 1;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 6px;
+    color: var(--color);
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-jelly:before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    background: var(--color);
+    height: 150px;
+    width: 200px;
+    border-radius: 50%;
+    top: 100%;
+    left: 100%;
+    transition: all 0.7s;
+}
+
+.btn-jelly:hover {
+    color: #fff;
+}
+
+.btn-jelly:hover:before {
+    top: -30px;
+    left: -30px;
+}
+
+.btn-jelly:active:before {
+    background: #3a0ca3;
+    transition: background 0s;
+}
+
+.projects-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+}
+
+.projects-header .section-title {
+    margin-bottom: 0;
+}
+
+/* ===== Search pill (projects page) — expanding circle search, Uiverse-style ===== */
+.project-search-uiverse {
+    margin: 0 0 0.75rem;
+}
+
+.search-pill {
+    display: flex;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    padding: 0 18px;
+    background-color: #4070f4;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.08);
+    transition: width 0.3s ease;
+}
+
+.search-pill:hover,
+.search-pill:focus-within {
+    width: 270px;
+}
+
+.search-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    fill: #fff;
+}
+
+.search-pill-input {
+    outline: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    color: #fff;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 0 12px;
+}
+
+.search-pill-input::placeholder {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* delete-confirmation popover ("bubble") — force site font, override browser/Tailwind default */
+.project-delete-modal {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ===== Shared buttons (form submit, modal actions) ===== */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.4rem;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.button:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+}
+
+.button-primary {
+    background-color: var(--navy);
+    border-color: var(--navy);
+    color: var(--paper);
+}
+
+.button-primary:hover {
+    background-color: var(--navy-deep);
+    border-color: var(--navy-deep);
+}
+
+.button-danger {
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
+}
+
+.button-danger:hover {
+    background-color: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: var(--paper);
+}
+
+.button-secondary {
+    border-color: var(--line);
+    color: var(--text-muted);
+}
+
+.button-secondary:hover {
+    background-color: var(--text-muted);
+    border-color: var(--text-muted);
+    color: var(--paper);
+}
+
+/* ===== Add/Edit Project form ===== */
+.project-form {
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-field label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 0.95rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: #fff;
+    color: var(--ink);
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: var(--blue);
+}
+
+.form-field textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-field__help {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.form-field__error {
+    color: var(--accent-dark);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.project-form > .button {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+}
