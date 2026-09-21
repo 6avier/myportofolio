@@ -1,4 +1,4 @@
-from main.forms import ProjectForm
+from main.forms import ProjectForm, ExperienceForm
 from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,9 +17,14 @@ def show_main(request):
 
 
 def show_experience(request):
+    json_response = get_experience_json(request)
+
+    experiences = serializers.deserialize("json", json_response.content.decode("utf-8"))
+    experiences = [experience.object for experience in experiences]
+
     context = {
         "name": "Kemas Xavier",
-        "experience_list": Experience.objects.all(),
+        "experience_list": experiences,
     }
     return render(request, "experience.html", context)
 
@@ -81,3 +86,42 @@ def delete_project(request, id):
         return redirect("main:show_projects")
 
     return redirect("main:show_projects")
+
+def get_experience_json(request):
+    experiences = Experience.objects.all()
+    experiences_json = serializers.serialize("json", experiences)
+    return HttpResponse(experiences_json, content_type="application/json")
+
+
+def create_experience(request):
+    form = ExperienceForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_experience')
+
+    context = {"name": "Kemas Xavier", "form": form, "is_update": False}
+    return render(request, "experience_form.html", context)
+
+
+def update_experience(request, id):
+    experience = get_object_or_404(Experience, pk=id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_experience')
+
+    context = {"name": "Kemas Xavier", "form": form, "is_update": True}
+    return render(request, "experience_form.html", context)
+
+
+def delete_experience(request, id):
+    experience = get_object_or_404(Experience, pk=id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience entry deleted successfully!")
+        return redirect("main:show_experience")
+
+    return redirect("main:show_experience")

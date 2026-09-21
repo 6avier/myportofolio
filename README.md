@@ -46,6 +46,7 @@ source env/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+```
 
 ---
 
@@ -99,3 +100,19 @@ kirim pesan errornya dan minta dijelasin penyebabnya.
 - Perancangan model `Education` dan alur MVT-nya.
 - Debugging error `URLField` dan `IndentationError` di test.
 - Penyusunan unit test untuk halaman `/education/`.
+
+### Tugas 3
+
+1. `ModelForm` saya pakai untuk `ProjectForm` dan `ExperienceForm` (`main/forms.py`) karena field form-nya otomatis diturunkan dari field model lewat `Meta.fields`, jadi saya tidak perlu menulis ulang `<input>` satu-satu dan menjaga sinkronisasi manual antara struktur model dan struktur form — kalau saya menambah field baru di model `Project`, saya cukup menambahkannya ke daftar `fields`, bukan mengubah HTML di semua tempat. `ModelForm` juga otomatis menjalankan validasi berdasarkan tipe field model: `github_url` dan `thumbnail` divalidasi sebagai URL, `ended_at` sebagai tanggal dan waktu, dan validasi itu berjalan konsisten lewat `form.is_valid()` tanpa saya menulis logic validasi sendiri. Selain itu, `form.save()` langsung tahu cara menyimpan (`create_project`) atau memperbarui (`update_experience`, lewat `instance=experience`) row yang sesuai ke database, tanpa saya menulis manual `Project.objects.create(title=request.POST['title'], ...)` yang rawan salah ketik nama field atau lupa satu kolom.
+
+   `{% csrf_token %}` wajib ada di setiap `<form method="POST">` karena Django menolak (403 Forbidden) request POST yang tidak menyertakan token CSRF yang valid. Token ini mencegah Cross-Site Request Forgery: tanpa itu, situs lain bisa membuat form tersembunyi yang otomatis submit ke endpoint seperti `/projects/<id>/delete/` milik saya begitu korban (yang sedang membuka situs saya di tab lain) membuka halaman situs jahat tersebut, dan request itu akan dianggap sah oleh server karena cookie sesi ikut terkirim otomatis oleh browser. `csrf_token` menyisipkan nilai acak unik per sesi yang hanya diketahui oleh form asli dari server saya, sehingga request dari domain lain yang tidak tahu token tersebut otomatis ditolak.
+
+2. JSON lebih disukai dibanding XML di pengembangan web modern karena beberapa alasan praktis yang saya rasakan langsung saat membangun `get_projects_json` dan `get_experience_json`. Pertama, ukuran payload JSON jauh lebih ringkas — XML butuh tag pembuka dan penutup untuk tiap elemen (`<title>VETO</title>`), sementara JSON cukup `"title": "VETO"`, sehingga untuk data yang sama response XML bisa jauh lebih besar, artinya lebih banyak bandwidth dan waktu transfer. Kedua, JSON native di JavaScript — objek JSON bisa langsung dipakai sebagai objek JavaScript tanpa parsing tambahan (`JSON.parse()` saja), sementara XML butuh `DOMParser` atau library khusus untuk diubah jadi struktur yang bisa diakses. Ketiga, di sisi Django sendiri, `serializers.serialize("json", ...)` menghasilkan struktur yang gampang dipetakan balik lewat `serializers.deserialize("json", ...)` seperti yang saya pakai di `show_projects` dan `show_experience`, sementara XML butuh skema/parsing tambahan yang lebih verbose. Untuk kebutuhan saya — endpoint sederhana yang dikonsumsi lewat pencarian (`?title=...`) dan di-parse ulang oleh Django sendiri — JSON jauh lebih ringan dan langsung dipakai tanpa langkah konversi tambahan.
+
+3. Serialization di proyek ini terjadi lewat `django.core.serializers`. Prosesnya: pertama, saya mengambil `QuerySet` dari database, misalnya `Project.objects.all()` atau hasil filter `.filter(title__icontains=title_query)` di `get_projects_json`. `QuerySet` ini masih berupa objek Python (instance model `Project`), bukan format yang bisa dikirim lewat HTTP — di sinilah `serializers.serialize("json", projects)` berperan, yaitu mengubah tiap objek Python jadi representasi teks berformat JSON, membaca tiap field model (`title`, `role`, `description`, dst) dan menuliskannya sebagai pasangan key-value di dalam struktur `{"model": ..., "pk": ..., "fields": {...}}`. Hasil string JSON itu saya bungkus dalam `HttpResponse` dengan `content_type="application/json"` supaya browser/klien tahu bahwa body response ini harus diperlakukan sebagai JSON, bukan HTML biasa. Proses sebaliknya (deserialization) saya pakai di `show_projects` dan `show_experience`: `serializers.deserialize("json", json_response.content.decode("utf-8"))` membaca string JSON itu kembali dan mengubahnya jadi generator objek `DeserializedObject`, yang lewat `.object` saya ambil jadi objek model `Project`/`Experience` yang asli lagi, siap dipakai di template Django (`{{ project.title }}`) seolah-olah datang langsung dari database.
+
+### Penggunaan AI
+
+**Tools:** Claude (Claude Code), model Sonnet 5.
+
+**Strategi prompting:** Sama seperti Tugas 2, untuk bagian logic (`forms.py`, `views.py`, `urls.py`, struktur template) saya minta dijelasin konsepnya dulu (misalnya beda `instance=` di `ModelForm` untuk Update vs Create) baru saya ketik sendiri kodenya, supaya paham bukan cuma copy-paste. Untuk bagian styling CSS (tombol, search bar dengan animasi hover, layout form) saya minta AI langsung yang edit filenya, karena itu murni soal tampilan, bukan logic yang perlu saya pahami cara kerja internalnya.
