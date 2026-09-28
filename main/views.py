@@ -106,7 +106,7 @@ def delete_project(request, id):
 
 def get_experience_json(request):
     experiences = Experience.objects.all()
-    experiences_json = serializers.serialize("json", experiences)
+    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
     return HttpResponse(experiences_json, content_type="application/json")
 
 
@@ -187,14 +187,29 @@ def logout_user(request):
     return response
 
 
+def _toggle_star(item, user):
+    """Add the user's star if missing, otherwise remove it (max one star per user)."""
+    if user in item.starred_by.all():
+        item.starred_by.remove(user)
+    else:
+        item.starred_by.add(user)
+
+
 @login_required(login_url="/login/")
 def toggle_star(request, id):
     project = get_object_or_404(Project, pk=id)
 
     if request.method == "POST":
-        if request.user in project.starred_by.all():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
+        _toggle_star(project, request.user)
 
     return redirect("main:show_projects")
+
+
+@login_required(login_url="/login/")
+def toggle_star_experience(request, id):
+    experience = get_object_or_404(Experience, pk=id)
+
+    if request.method == "POST":
+        _toggle_star(experience, request.user)
+
+    return redirect("main:show_experience")
