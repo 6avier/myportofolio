@@ -7,7 +7,9 @@
     <div class="container">
         <div class="projects-header">
             <h1 class="section-title ransom-text ransom-ink">Projects</h1>
+            {% if user.is_superuser %}
             <a href="{% url 'main:create_project' %}" class="btn-jelly">Add Project</a>
+            {% endif %}
         </div>
 
         <form method="get" action="{% url 'main:show_projects' %}" class="project-search-uiverse">
@@ -37,7 +39,10 @@
                     {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
                     {% if project.demo_url %}<a href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer">Live Demo</a>{% endif %}
                 </div>
+                {% include "components/project_star.html" with project=project %}
+                {% if user.is_superuser %}
                 {% include "components/project_delete_modal.html" with project=project %}
+                {% endif %}
             </article>
             {% empty %}
             <p class="empty-state">No projects added yet.</p>
