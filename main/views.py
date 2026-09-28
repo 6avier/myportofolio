@@ -4,6 +4,7 @@ from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from main.models import Experience, Education, Project, Skill
+from main.permissions import can_edit
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -32,6 +33,7 @@ def show_experience(request):
     context = {
         "name": "Kemas Xavier",
         "experience_list": experiences,
+        "can_edit": can_edit(request.user),
     }
     return render(request, "experience.html", context)
 
@@ -108,7 +110,11 @@ def get_experience_json(request):
     return HttpResponse(experiences_json, content_type="application/json")
 
 
+@login_required(login_url="/login/")
 def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     form = ExperienceForm(request.POST or None)
 
     if form.is_valid() and request.method == "POST":
@@ -119,7 +125,11 @@ def create_experience(request):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def update_experience(request, id):
+    if not can_edit(request.user):
+        raise PermissionDenied
+
     experience = get_object_or_404(Experience, pk=id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -131,7 +141,11 @@ def update_experience(request, id):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def delete_experience(request, id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     experience = get_object_or_404(Experience, pk=id)
 
     if request.method == "POST":
