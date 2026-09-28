@@ -116,3 +116,37 @@ kirim pesan errornya dan minta dijelasin penyebabnya.
 **Tools:** Claude (Claude Code), model Sonnet 5.
 
 **Strategi prompting:** Sama seperti Tugas 2, untuk bagian logic (`forms.py`, `views.py`, `urls.py`, struktur template) saya minta dijelasin konsepnya dulu (misalnya beda `instance=` di `ModelForm` untuk Update vs Create) baru saya ketik sendiri kodenya, supaya paham bukan cuma copy-paste. Untuk bagian styling CSS (tombol, search bar dengan animasi hover, layout form) saya minta AI langsung yang edit filenya, karena itu murni soal tampilan, bukan logic yang perlu saya pahami cara kerja internalnya.
+
+### Tugas 4
+
+Bagian Experience sekarang memakai autentikasi Django dengan empat peran. Pengunjung yang belum login diarahkan ke `/login/`, aksi yang tidak diizinkan dibalas 403 di sisi server, dan tombol yang tidak boleh dipakai disembunyikan di template.
+
+- **Pengguna biasa:** bisa memberi star, tetapi tidak bisa create, update, atau delete (403).
+- **Editor:** bisa memberi star dan update, tetapi tidak bisa create atau delete (403).
+- **Pemilik (superuser):** bisa memberi star, create, update, dan delete.
+
+Editor adalah Django Group bernama `Editor`. Star memakai `ManyToManyField` ke `User`, dan API JSON menampilkan username, bukan id.
+
+Setup: grup `Editor` adalah data di database, jadi perlu dibuat sendiri.
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+Lalu buka `/admin/`, tambahkan grup `Editor` di **Groups**, dan masukkan akun biasa ke grup itu lewat **Users**.
+
+### Penggunaan AI
+
+**Tools:** Claude (Claude Code), model Claude Sonnet 5.
+
+**Strategi prompting:** Sama seperti Tugas 3, saya minta AI membantu dengan arahan dan penjelasan dulu. Langkah awal Tutorial 4 (register, login, logout) saya ketik sendiri mengikuti penjelasannya.
+
+**Bagian yang dibantu:**
+
+- Cookie `last_login`, pembatasan akses Project dan Experience, serta fitur star.
+- Peran Editor (`main/permissions.py`) dan tombol yang disembunyikan per peran.
+- Test dan README ini.
+
+**Keterbatasan:** contoh kode tutorial harus disesuaikan ke proyek saya (id integer, nama file, dan block template berbeda). Test pertama yang ditulis AI juga sempat punya celah (tombol Delete untuk Editor tidak terdeteksi), yang baru ketahuan setelah kodenya sengaja dirusak untuk menguji test-nya.

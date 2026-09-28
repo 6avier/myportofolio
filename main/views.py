@@ -4,6 +4,7 @@ from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from main.models import Experience, Education, Project, Skill
+from main.permissions import can_edit
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -32,6 +33,7 @@ def show_experience(request):
     context = {
         "name": "Kemas Xavier",
         "experience_list": experiences,
+        "can_edit": can_edit(request.user),
     }
     return render(request, "experience.html", context)
 
@@ -104,11 +106,15 @@ def delete_project(request, id):
 
 def get_experience_json(request):
     experiences = Experience.objects.all()
-    experiences_json = serializers.serialize("json", experiences)
+    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
     return HttpResponse(experiences_json, content_type="application/json")
 
 
+@login_required(login_url="/login/")
 def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     form = ExperienceForm(request.POST or None)
 
     if form.is_valid() and request.method == "POST":
@@ -119,7 +125,11 @@ def create_experience(request):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def update_experience(request, id):
+    if not can_edit(request.user):
+        raise PermissionDenied
+
     experience = get_object_or_404(Experience, pk=id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -131,7 +141,11 @@ def update_experience(request, id):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def delete_experience(request, id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     experience = get_object_or_404(Experience, pk=id)
 
     if request.method == "POST":
@@ -173,14 +187,29 @@ def logout_user(request):
     return response
 
 
+def _toggle_star(item, user):
+    """Add the user's star if missing, otherwise remove it (max one star per user)."""
+    if user in item.starred_by.all():
+        item.starred_by.remove(user)
+    else:
+        item.starred_by.add(user)
+
+
 @login_required(login_url="/login/")
 def toggle_star(request, id):
     project = get_object_or_404(Project, pk=id)
 
     if request.method == "POST":
-        if request.user in project.starred_by.all():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
+        _toggle_star(project, request.user)
 
     return redirect("main:show_projects")
+
+
+@login_required(login_url="/login/")
+def toggle_star_experience(request, id):
+    experience = get_object_or_404(Experience, pk=id)
+
+    if request.method == "POST":
+        _toggle_star(experience, request.user)
+
+    return redirect("main:show_experience")
