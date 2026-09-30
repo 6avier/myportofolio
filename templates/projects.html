@@ -12,7 +12,7 @@
             {% endif %}
         </div>
 
-        <form method="get" action="{% url 'main:show_projects' %}" class="project-search-uiverse">
+        <form id="project-search-form" class="project-search-uiverse">
             <div class="search-pill">
                 <button type="submit" class="search-icon-btn" aria-label="Search projects by name">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
@@ -20,6 +20,7 @@
                     </svg>
                 </button>
                 <input type="text"
+                       id="search-input"
                        name="title"
                        value="{{ title_query }}"
                        placeholder="Search projects"
@@ -28,26 +29,125 @@
             </div>
         </form>
 
-        <div class="experience-grid">
-            {% for project in project_list %}
-            <article class="experience-card">
-                <span class="experience-category">{{ project.year }}</span>
-                <h2>{{ project.title }}</h2>
-                <p class="experience-description">{{ project.role }}</p>
-                <p class="experience-description">{{ project.description }}</p>
-                <div class="entry-links">
-                    {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
-                    {% if project.demo_url %}<a href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer">Live Demo</a>{% endif %}
-                </div>
-                {% include "components/project_star.html" with project=project %}
-                {% if user.is_superuser %}
-                {% include "components/project_delete_modal.html" with project=project %}
-                {% endif %}
-            </article>
-            {% empty %}
-            <p class="empty-state">No projects added yet.</p>
-            {% endfor %}
-        </div>
+        <p id="projects-loading" class="empty-state">Loading projects...</p>
+        <p id="projects-error" class="empty-state hide">Failed to load projects. Please try again.</p>
+        <p id="projects-empty" class="empty-state hide">No projects added yet.</p>
+        <div id="projects-grid" class="experience-grid hide"></div>
     </div>
 </section>
+
+<script>
+    // Configuration
+    const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
+    const STAR_URL_TEMPLATE = "{% url 'main:toggle_star' 0 %}";
+    const DELETE_URL_TEMPLATE = "{% url 'main:delete_project' 0 %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+    const CSRF_TOKEN = "{{ csrf_token }}";
+
+    const searchForm = document.getElementById("project-search-form");
+    const searchInput = document.getElementById("search-input");
+    const projectsGrid = document.getElementById("projects-grid");
+
+    let activeController = null;
+
+    // Show exactly one of: loading / error / empty / grid
+    function displayPageSection({ loading = false, error = false, empty = false, grid = false }) {
+        document.getElementById("projects-loading").classList.toggle("hide", !loading);
+        document.getElementById("projects-error").classList.toggle("hide", !error);
+        document.getElementById("projects-empty").classList.toggle("hide", !empty);
+        projectsGrid.classList.toggle("hide", !grid);
+    }
+
+    function buildProjectCardElement(project) {
+        const githubLink = project.github_url
+            ? `<a href="${project.github_url}" target="_blank" rel="noopener noreferrer">GitHub</a>` : "";
+        const demoLink = project.demo_url
+            ? `<a href="${project.demo_url}" target="_blank" rel="noopener noreferrer">Live Demo</a>` : "";
+
+        const starTitle = project.star_count
+            ? `Starred by ${project.starred_by.join(", ")}` : "Be the first to star this";
+        const starForm = IS_AUTHENTICATED ? `
+            <form method="post" action="${STAR_URL_TEMPLATE.replace("/0/", `/${project.id}/`)}" class="star-form">
+                <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF_TOKEN}">
+                <button type="submit"
+                        class="button button-star${project.is_starred ? " is-starred" : ""}"
+                        title="${starTitle}">
+                    <span aria-hidden="true">★</span>
+                    ${project.is_starred ? "Unstar" : "Star"}
+                    <span class="star-count">${project.star_count}</span>
+                </button>
+            </form>` : "";
+
+        const deleteUrl = DELETE_URL_TEMPLATE.replace("/0/", `/${project.id}/`);
+        const deleteModal = IS_SUPERUSER ? `
+            <p class="experience-status">
+                <button type="button" class="button button-danger"
+                        popovertarget="delete-project-${project.id}"
+                        aria-label="Delete ${project.title}" title="Delete project">Delete Project</button>
+            </p>
+            <div id="delete-project-${project.id}" class="project-delete-modal" popover="auto"
+                 role="dialog" aria-modal="true" aria-labelledby="delete-project-title-${project.id}">
+                <button type="button" class="project-delete-modal__backdrop"
+                        popovertarget="delete-project-${project.id}" popovertargetaction="hide"
+                        aria-label="Close delete confirmation"></button>
+                <div class="project-delete-modal__content">
+                    <button type="button" class="project-delete-modal__close"
+                            popovertarget="delete-project-${project.id}" popovertargetaction="hide"
+                            aria-label="Close delete confirmation">×</button>
+                    <h2 id="delete-project-title-${project.id}">Delete Project?</h2>
+                    <p>Are you sure you want to delete <strong>${project.title}</strong>?</p>
+                    <div class="project-delete-modal__actions">
+                        <button type="button" class="button button-secondary"
+                                popovertarget="delete-project-${project.id}" popovertargetaction="hide">Cancel</button>
+                        <form method="post" action="${deleteUrl}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF_TOKEN}">
+                            <button type="submit" class="button button-danger">Yes, Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>` : "";
+
+        const card = document.createElement("article");
+        card.className = "experience-card";
+        card.innerHTML = `
+            <span class="experience-category">${project.year}</span>
+            <h2>${project.title}</h2>
+            <p class="experience-description">${project.role}</p>
+            <p class="experience-description">${project.description}</p>
+            <div class="entry-links">${githubLink}${demoLink}</div>
+            ${starForm}
+            ${deleteModal}`;
+        return card;
+    }
+
+    async function fetchProjects(title = "") {
+        // Cancel the previous request so a slow old response can't overwrite a newer one
+        if (activeController) activeController.abort();
+        activeController = new AbortController();
+
+        displayPageSection({ loading: true });
+        try {
+            const url = `${BASE_PROJECTS_ENDPOINT}?title=${encodeURIComponent(title)}`;
+            const response = await fetch(url, { signal: activeController.signal });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const projects = await response.json();
+
+            projectsGrid.innerHTML = "";
+            projects.forEach((project) => projectsGrid.appendChild(buildProjectCardElement(project)));
+            displayPageSection(projects.length ? { grid: true } : { empty: true });
+        } catch (err) {
+            if (err.name === "AbortError") return;
+            displayPageSection({ error: true });
+        }
+    }
+
+    searchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        fetchProjects(searchInput.value.trim());
+    });
+
+    fetchProjects(searchInput.value.trim());
+</script>
+
 {% endblock %}

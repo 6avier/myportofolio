@@ -1,5 +1,5 @@
 from main.forms import ProjectForm, ExperienceForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -45,15 +45,10 @@ def show_education(request):
     return render(request, "education.html", context)
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-
-    projects = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Kemas Xavier",
-        "project_list": projects,
         "title_query": title_query,
     }
     return render(request, "projects.html", context)
@@ -82,13 +77,30 @@ def create_project(request):
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related("starred_by").all()
 
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    projects_json = serializers.serialize("json", projects, use_natural_foreign_keys=True)
-    return HttpResponse(projects_json, content_type="application/json")
+    # Built by hand (not serializers.serialize) so each item can say whether
+    # the *current* user starred it.
+    data = []
+    for project in projects:
+        starred_by = [user.username for user in project.starred_by.all()]
+        data.append({
+            "id": project.id,
+            "title": project.title,
+            "role": project.role,
+            "description": project.description,
+            "year": project.year,
+            "github_url": project.github_url,
+            "demo_url": project.demo_url,
+            "starred_by": starred_by,
+            "star_count": len(starred_by),
+            "is_starred": request.user.is_authenticated and request.user.username in starred_by,
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="/login/")
 def delete_project(request, id):
