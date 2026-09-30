@@ -975,3 +975,84 @@ html {
     font-weight: 600;
     color: var(--text-muted);
 }
+
+/* ===== Add Project modal ===== */
+.project-form-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.project-form-modal:popover-open {
+    display: flex;
+}
+
+.project-form-modal::backdrop {
+    background: rgba(28, 25, 23, 0.55);
+}
+
+.project-form-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: default;
+}
+
+.project-form-modal__content {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: 2rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    box-shadow: 8px 8px 0 var(--ink);
+}
+
+.project-form-modal__content h2 {
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.project-form-modal__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    border: 0;
+    background: transparent;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.project-form-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.project-form-modal .project-form {
+    max-width: none;
+}
+
+.project-form-modal .project-form > .button {
+    align-self: auto;
+}
