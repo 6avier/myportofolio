@@ -49,6 +49,9 @@
     const searchInput = document.getElementById("search-input");
     const projectsGrid = document.getElementById("projects-grid");
 
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+
     let activeController = null;
 
     // Show exactly one of: loading / error / empty / grid
@@ -142,9 +145,21 @@
         }
     }
 
+    function searchProjects() {
+        fetchProjects(searchInput.value.trim());
+    }
+
+    // Wait until the user pauses typing before hitting the server
+    searchInput.addEventListener("input", function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(searchProjects, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    // Search button / Enter searches immediately
     searchForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        fetchProjects(searchInput.value.trim());
+        clearTimeout(searchDebounceTimer);
+        searchProjects();
     });
 
     fetchProjects(searchInput.value.trim());
