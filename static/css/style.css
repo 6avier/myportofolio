@@ -919,3 +919,59 @@ html {
     background: rgba(255, 255, 255, 0.25);
     font-size: 0.8rem;
 }
+
+/* ===== Utility ===== */
+.hide {
+    display: none !important;
+}
+
+/* ===== Toast ===== */
+.toast-component {
+    position: fixed;
+    inset: auto 2rem 2rem auto;
+    margin: 0;
+    padding: 1rem 1.5rem;
+    max-width: min(22rem, calc(100vw - 4rem));
+    border: 2px solid var(--ink);
+    border-left-width: 8px;
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 10px 25px rgba(28, 25, 23, 0.15);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-component.toast-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-component.toast-hidden {
+    opacity: 0;
+    transform: translateY(1.5rem);
+}
+
+.toast-success {
+    border-color: #2f7d4f;
+}
+
+.toast-error {
+    border-color: var(--accent-dark);
+}
+
+.toast-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.toast-message {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
