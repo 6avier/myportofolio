@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 import datetime
 
 
@@ -75,6 +76,24 @@ def create_project(request):
 
     context = {"name": "Kemas Xavier", "form": form}
     return render(request, "project_form.html", context)
+
+# No @login_required here: it would redirect anonymous fetch() calls to the HTML
+# login page (status 200). A JSON 403 is easier for the JS to handle.
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add projects."}, status=403)
+
+    form = ProjectForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse(
+            {"message": "Invalid data.", "errors": form.errors.get_json_data()},
+            status=400,
+        )
+
+    project = form.save()
+    return JsonResponse({"message": "Project added successfully!", "id": project.id}, status=201)
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
