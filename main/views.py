@@ -1,5 +1,5 @@
 from main.forms import ProjectForm, ExperienceForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 import datetime
 
 
@@ -45,16 +46,12 @@ def show_education(request):
     return render(request, "education.html", context)
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-
-    projects = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Kemas Xavier",
-        "project_list": projects,
         "title_query": title_query,
+        "form": ProjectForm(),
     }
     return render(request, "projects.html", context)
 
@@ -80,15 +77,50 @@ def create_project(request):
     context = {"name": "Kemas Xavier", "form": form}
     return render(request, "project_form.html", context)
 
+# No @login_required here: it would redirect anonymous fetch() calls to the HTML
+# login page (status 200). A JSON 403 is easier for the JS to handle.
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add projects."}, status=403)
+
+    form = ProjectForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse(
+            {"message": "Invalid data.", "errors": form.errors.get_json_data()},
+            status=400,
+        )
+
+    project = form.save()
+    return JsonResponse({"message": "Project added successfully!", "id": project.id}, status=201)
+
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related("starred_by").all()
 
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    projects_json = serializers.serialize("json", projects, use_natural_foreign_keys=True)
-    return HttpResponse(projects_json, content_type="application/json")
+    # Built by hand (not serializers.serialize) so each item can say whether
+    # the *current* user starred it.
+    data = []
+    for project in projects:
+        starred_by = [user.username for user in project.starred_by.all()]
+        data.append({
+            "id": project.id,
+            "title": project.title,
+            "role": project.role,
+            "description": project.description,
+            "year": project.year,
+            "github_url": project.github_url,
+            "demo_url": project.demo_url,
+            "starred_by": starred_by,
+            "star_count": len(starred_by),
+            "is_starred": request.user.is_authenticated and request.user.username in starred_by,
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="/login/")
 def delete_project(request, id):
