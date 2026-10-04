@@ -660,7 +660,7 @@ html {
 
 /* Uiverse.io by cssbuttons-io — "slippery-jellyfish-67" button, adapted for + Add Project */
 .btn-jelly {
-    --color: #560bad;
+    --color: var(--navy);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     display: inline-block;
     padding: 0 1.6em;
@@ -683,14 +683,13 @@ html {
 .btn-jelly:before {
     content: "";
     position: absolute;
+    inset: 0;
     z-index: -1;
     background: var(--color);
-    height: 150px;
-    width: 200px;
     border-radius: 50%;
-    top: 100%;
-    left: 100%;
-    transition: all 0.7s;
+    /* starts as a dot at the bottom-right corner, grows from the button's own size so any width is covered */
+    transform: translate(50%, 50%) scale(0);
+    transition: transform 0.7s;
 }
 
 .btn-jelly:hover {
@@ -698,12 +697,11 @@ html {
 }
 
 .btn-jelly:hover:before {
-    top: -30px;
-    left: -30px;
+    transform: translate(0, 0) scale(1.6);
 }
 
 .btn-jelly:active:before {
-    background: #3a0ca3;
+    background: var(--navy-deep);
     transition: background 0s;
 }
 
@@ -713,6 +711,7 @@ html {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem 1.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .projects-header .section-title {
