@@ -1,6 +1,5 @@
 from main.forms import ProjectForm, ExperienceForm
-from django.http import HttpResponse, JsonResponse
-from django.core import serializers
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from main.models import Experience, Education, Project, Skill
@@ -26,14 +25,8 @@ def show_main(request):
 
 
 def show_experience(request):
-    json_response = get_experience_json(request)
-
-    experiences = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    experiences = [experience.object for experience in experiences]
-
     context = {
         "name": "Kemas Xavier",
-        "experience_list": experiences,
         "can_edit": can_edit(request.user),
     }
     return render(request, "experience.html", context)
@@ -133,9 +126,25 @@ def delete_project(request, id):
     return redirect("main:show_projects")
 
 def get_experience_json(request):
-    experiences = Experience.objects.all()
-    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
-    return HttpResponse(experiences_json, content_type="application/json")
+    experiences = Experience.objects.prefetch_related("starred_by").all()
+
+    data = []
+    for experience in experiences:
+        starred_by = [user.username for user in experience.starred_by.all()]
+        data.append({
+            "id": str(experience.id),
+            "title": experience.title,
+            "description": experience.description,
+            "category": experience.category,
+            "category_display": experience.get_category_display(),
+            "thumbnail": experience.thumbnail,
+            "is_ongoing": experience.is_ongoing,
+            "starred_by": starred_by,
+            "star_count": len(starred_by),
+            "is_starred": request.user.is_authenticated and request.user.username in starred_by,
+        })
+
+    return JsonResponse(data, safe=False)
 
 
 @login_required(login_url="/login/")

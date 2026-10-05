@@ -69,16 +69,6 @@
         projectsGrid.classList.toggle("hide", !grid);
     }
 
-    // Turn HTML special characters into entities so data is shown as text, not parsed as HTML
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
-    }
-
     function buildProjectCardElement(project) {
         const githubLink = project.github_url
             ? `<a href="${escapeHtml(project.github_url)}" target="_blank" rel="noopener noreferrer">GitHub</a>` : "";
@@ -178,12 +168,6 @@
 
     const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
     const projectForm = document.getElementById("project-form");
-
-    // Read a cookie value by name (used to get Django's CSRF token)
-    function getCookie(name) {
-        const match = document.cookie.split("; ").find((row) => row.startsWith(name + "="));
-        return match ? decodeURIComponent(match.split("=")[1]) : null;
-    }
 
     if (projectForm) {
         projectForm.addEventListener("submit", async function (event) {

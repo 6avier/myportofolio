@@ -38,28 +38,33 @@ class MainTest(TestCase):
         self.assertEqual(self.experience.category, "part-time")
         self.assertTrue(self.experience.is_ongoing)
 
-    def test_experience_page(self):
+    def test_experience_page_renders_shell_and_loads_data_from_json(self):
         response = self.client.get(reverse("main:show_experience"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
-        self.assertContains(response, self.experience.title)
-        self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Ongoing")
+        self.assertContains(response, reverse("main:get_experience_json"))
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
+        self.assertNotContains(response, self.experience.title)
 
-    def test_empty_experience_page(self):
+    def test_experience_json_lists_fields_for_the_page(self):
+        data = self.client.get(reverse("main:get_experience_json")).json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["title"], self.experience.title)
+        self.assertEqual(data[0]["description"], self.experience.description)
+        self.assertEqual(data[0]["category_display"], "Part-Time")
+        self.assertTrue(data[0]["is_ongoing"])
+
+    def test_empty_experience_json(self):
         Experience.objects.all().delete()
-        response = self.client.get(reverse("main:show_experience"))
-        self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        response = self.client.get(reverse("main:get_experience_json"))
+        self.assertEqual(response.json(), [])
 
-    def test_completed_experience(self):
+    def test_completed_experience_json(self):
         self.experience.ended_at = timezone.now()
         self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
+        data = self.client.get(reverse("main:get_experience_json")).json()
         self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Completed")
-        self.assertNotContains(response, "Ongoing")
+        self.assertFalse(data[0]["is_ongoing"])
 
     def test_education_page(self):
         response = self.client.get(reverse("main:show_education"))
@@ -176,10 +181,8 @@ class ExperiencePermissionTest(RoleTestCase):
             html = self.client.get(reverse("main:show_experience")).content.decode()
             label = user.username if user else "visitor"
             self.assertEqual(self.create_url in html, add, f"Add button for {label}")
-            self.assertEqual(self.update_url in html, edit, f"Edit button for {label}")
-            self.assertEqual(self.delete_url in html, delete, f"Delete form for {label}")
-            trigger = f'popovertarget="delete-experience-{self.experience.id}"'
-            self.assertEqual(trigger in html, delete, f"Delete button for {label}")
+            self.assertIn(f"const CAN_EDIT = {str(edit).lower()};", html, f"Edit flag for {label}")
+            self.assertIn(f"const IS_SUPERUSER = {str(delete).lower()};", html, f"Delete flag for {label}")
 
 
 class ExperienceStarTest(RoleTestCase):
@@ -202,14 +205,19 @@ class ExperienceStarTest(RoleTestCase):
         self.client.get(self.star_url)
         self.assertEqual(self.experience.starred_by.count(), 0)
 
-    def test_page_shows_count_and_current_user_state(self):
+    def test_json_shows_count_and_current_user_state(self):
         self.experience.starred_by.add(self.regular, self.editor)
+        url = reverse("main:get_experience_json")
+
         self.login_as(self.regular)
-        html = self.client.get(reverse("main:show_experience")).content.decode()
-        self.assertIn("Unstar", html)
-        self.assertIn('<span class="star-count">2</span>', html)
+        item = self.client.get(url).json()[0]
+        self.assertTrue(item["is_starred"])
+        self.assertEqual(item["star_count"], 2)
+
         self.client.logout()
-        self.assertNotIn("Unstar", self.client.get(reverse("main:show_experience")).content.decode())
+        item = self.client.get(url).json()[0]
+        self.assertFalse(item["is_starred"])
+        self.assertEqual(item["star_count"], 2)
 
     def test_star_on_missing_experience_returns_404(self):
         self.login_as(self.regular)
@@ -222,13 +230,12 @@ class ExperienceJsonApiTest(RoleTestCase):
         response = self.client.get(reverse("main:get_experience_json"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        self.assertEqual(json.loads(response.content)[0]["fields"]["title"], self.experience.title)
+        self.assertEqual(response.json()[0]["title"], self.experience.title)
 
     def test_json_exposes_usernames_not_ids_or_sensitive_fields(self):
         self.experience.starred_by.add(self.regular)
         body = self.client.get(reverse("main:get_experience_json")).content.decode()
-        starred_by = json.loads(body)[0]["fields"]["starred_by"]
-        self.assertEqual(starred_by, [["regular"]])
+        self.assertEqual(json.loads(body)[0]["starred_by"], ["regular"])
         for leaked in ("password", "email", "is_superuser"):
             self.assertNotIn(leaked, body)
 
