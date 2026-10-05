@@ -90,7 +90,7 @@ class RoleTestCase(TestCase):
     """Base class: one experience, plus a regular user, an editor and an owner."""
 
     def setUp(self):
-        logging.disable(logging.WARNING)  # keep expected 403 warnings out of test output
+        logging.disable(logging.WARNING)
         self.addCleanup(logging.disable, logging.NOTSET)
 
         self.experience = Experience.objects.create(

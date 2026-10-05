@@ -36,9 +36,6 @@
         el.setAttribute('aria-label', text);
         el.innerHTML = '';
 
-        // Group letters per word inside an atomic wrapper span, so the
-        // browser can only wrap lines between words (like normal text),
-        // never in the middle of a word.
         var words = text.split(' ');
         words.forEach(function (word, wi) {
             var wordSpan = document.createElement('span');

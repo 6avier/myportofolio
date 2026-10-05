@@ -11,7 +11,6 @@ function showToast(title, message, type = 'normal', duration = 3000) {
     toastComponent.classList.remove('toast-success', 'toast-error', 'toast-normal');
     toastComponent.classList.add(`toast-${type}`);
 
-    // textContent never parses its value as HTML, so server messages are safe here.
     toastTitle.textContent = title;
     toastMessage.textContent = message;
 

@@ -77,8 +77,6 @@ def create_project(request):
     context = {"name": "Kemas Xavier", "form": form}
     return render(request, "project_form.html", context)
 
-# No @login_required here: it would redirect anonymous fetch() calls to the HTML
-# login page (status 200). A JSON 403 is easier for the JS to handle.
 @require_POST
 def create_project_ajax(request):
     if not request.user.is_superuser:
@@ -102,8 +100,6 @@ def get_projects_json(request):
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    # Built by hand (not serializers.serialize) so each item can say whether
-    # the *current* user starred it.
     data = []
     for project in projects:
         starred_by = [user.username for user in project.starred_by.all()]
