@@ -126,6 +126,23 @@ def delete_project(request, id):
 
     return redirect("main:show_projects")
 
+@require_POST
+def create_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add experience."}, status=403)
+
+    form = ExperienceForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse(
+            {"message": "Invalid data.", "errors": form.errors.get_json_data()},
+            status=400,
+        )
+
+    experience = form.save()
+    return JsonResponse({"message": "Experience added successfully!", "id": str(experience.id)}, status=201)
+
+
 def get_experience_json(request):
     title_query = request.GET.get("title", "").strip()
     experiences = Experience.objects.prefetch_related("starred_by").all()

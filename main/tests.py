@@ -194,6 +194,47 @@ class ExperiencePermissionTest(RoleTestCase):
             self.assertIn(f"const IS_SUPERUSER = {str(delete).lower()};", html, f"Delete flag for {label}")
 
 
+class ExperienceCreateAjaxTest(RoleTestCase):
+    def setUp(self):
+        super().setUp()
+        self.ajax_url = reverse("main:create_experience_ajax")
+
+    def test_owner_creates_experience_and_gets_201(self):
+        self.login_as(self.owner)
+        response = self.client.post(self.ajax_url, self.form_data("Created by ajax"))
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Experience.objects.filter(title="Created by ajax").exists())
+        self.assertIn("message", response.json())
+
+    def test_invalid_data_returns_400_with_field_errors(self):
+        self.login_as(self.owner)
+        response = self.client.post(self.ajax_url, {"title": "", "description": "x", "category": "research"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.json()["errors"])
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_visitor_regular_user_and_editor_get_403(self):
+        for user in (None, self.regular, self.editor):
+            self.client.logout()
+            if user:
+                self.login_as(user)
+            response = self.client.post(self.ajax_url, self.form_data("Blocked"))
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_get_is_not_allowed(self):
+        self.login_as(self.owner)
+        self.assertEqual(self.client.get(self.ajax_url).status_code, 405)
+
+    def test_post_without_csrf_token_is_rejected(self):
+        from django.test import Client
+        client = Client(enforce_csrf_checks=True)
+        client.login(username="owner", password=PASSWORD)
+        self.assertEqual(client.post(self.ajax_url, self.form_data("No token")).status_code, 403)
+        self.assertEqual(Experience.objects.count(), 1)
+
+
 class ExperienceStarTest(RoleTestCase):
     def test_toggle_adds_then_removes_the_star(self):
         self.login_as(self.regular)
