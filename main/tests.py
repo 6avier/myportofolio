@@ -54,6 +54,15 @@ class MainTest(TestCase):
         self.assertEqual(data[0]["category_display"], "Part-Time")
         self.assertTrue(data[0]["is_ongoing"])
 
+    def test_experience_json_can_be_searched_by_title(self):
+        Experience.objects.create(title="Research Assistant", description="Paper work.")
+        url = reverse("main:get_experience_json")
+
+        titles = [item["title"] for item in self.client.get(url, {"title": "research"}).json()]
+        self.assertEqual(titles, ["Research Assistant"])
+        self.assertEqual(self.client.get(url, {"title": "no match"}).json(), [])
+        self.assertEqual(len(self.client.get(url, {"title": "  "}).json()), 2)
+
     def test_empty_experience_json(self):
         Experience.objects.all().delete()
         response = self.client.get(reverse("main:get_experience_json"))

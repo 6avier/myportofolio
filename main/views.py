@@ -126,7 +126,11 @@ def delete_project(request, id):
     return redirect("main:show_projects")
 
 def get_experience_json(request):
+    title_query = request.GET.get("title", "").strip()
     experiences = Experience.objects.prefetch_related("starred_by").all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
 
     data = []
     for experience in experiences:
