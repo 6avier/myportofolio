@@ -30,7 +30,6 @@
     font-display: swap;
 }
 
-/* self-hosted fallbacks for the Mac-only system fonts (Phosphate/Avenir) */
 @font-face {
     font-family: "Bungee";
     src: url("/static/fonts/Bungee-Regular.woff2") format("woff2");
@@ -145,8 +144,6 @@ body {
     text-transform: uppercase;
 }
 
-/* each word gets its own line, so re-randomising the letters can never
-   flip "Kemas / Xavier" onto a single line */
 .hero-identity h1 .word {
     display: block;
 }
@@ -343,12 +340,10 @@ html {
     padding: 0 1.5rem;
 }
 
-/* reserve enough height that the floating logos never spill into the next section */
 #education .section-grid { min-height: 19rem; }
 #projects .section-grid { min-height: 26rem; }
 #experience .section-grid { min-height: 25rem; }
 
-/* placement is authored once — same on every load, never random */
 #about .section-block      { grid-column: 2 / 8; }
 #education .section-block  { grid-column: 7 / 12; }
 #projects .section-block   { grid-column: 1 / 11; }
@@ -384,19 +379,15 @@ html {
     margin-top: 0;
 }
 
-/* logos float free in the empty space the asymmetry leaves behind —
-   they belong to their section, but are not tied to any single entry */
 .section-logo {
     position: absolute;
     display: block;
     object-fit: contain;
-    background-color: var(--paper);
+    background-color: #fff;
     border: 2px solid var(--ink);
     padding: 0.4rem;
 }
 
-/* stickers: no frame, so they read as slapped on rather than catalogued
-   like the institutional logos above */
 .section-sticker {
     position: absolute;
     display: block;
@@ -407,7 +398,6 @@ html {
 .sticker-veto-2 { width: 4.25rem; right: 9%; top: 11rem;  transform: rotate(7deg); }
 .sticker-veto-3 { width: 6rem;    right: 0;  top: 19rem;  transform: rotate(-4deg); }
 
-/* placement authored once — identical on every load, never random */
 .logo-ui       { width: 7rem;    left: 4%;  top: 0;      transform: rotate(-7deg); }
 .logo-alazhar  { width: 4.5rem;  left: 30%; top: 12rem;  transform: rotate(6deg); }
 .logo-bem      { width: 7.75rem; left: 1%;  top: 1.5rem; transform: rotate(4deg); }
@@ -505,13 +495,11 @@ html {
     color: var(--paper);
 }
 
-/* asymmetry is a desktop treatment — collapse to one column below this */
 @media (max-width: 900px) {
     .section-block {
         grid-column: 1 / -1 !important;
     }
 
-    /* no empty space left to float in — logos rejoin the flow, but stay scattered */
     #education .section-grid,
     #projects .section-grid,
     #experience .section-grid {
@@ -543,9 +531,6 @@ html {
 }
 
 @media (max-width: 600px) {
-    /* fixed-width brand column: the ransom letters re-randomise to widths
-       between 56px and 92px, and a flexible column let that shove the nav
-       around. A fixed track keeps the nav anchored no matter what renders. */
     .site-header .container {
         display: grid;
         grid-template-columns: 7rem 1fr;
@@ -567,7 +552,6 @@ html {
         padding: 3rem 0;
     }
 
-    /* hero sat ~90px below the nav on phones — tighten it up */
     .hero {
         padding: 1.25rem 0 3rem;
     }
@@ -628,8 +612,8 @@ html {
     right: 1rem;
     width: 5rem;
     height: 5rem;
-    object-fit: cover;
-    background-color: var(--paper);
+    object-fit: contain;
+    background-color: #fff;
     border: 2px solid var(--ink);
     padding: 0.3rem;
     transform: rotate(-6deg);
@@ -660,7 +644,7 @@ html {
 
 /* Uiverse.io by cssbuttons-io — "slippery-jellyfish-67" button, adapted for + Add Project */
 .btn-jelly {
-    --color: #560bad;
+    --color: var(--blue);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     display: inline-block;
     padding: 0 1.6em;
@@ -683,14 +667,11 @@ html {
 .btn-jelly:before {
     content: "";
     position: absolute;
+    inset: -1px;
     z-index: -1;
     background: var(--color);
-    height: 150px;
-    width: 200px;
-    border-radius: 50%;
-    top: 100%;
-    left: 100%;
-    transition: all 0.7s;
+    clip-path: circle(0% at 100% 100%);
+    transition: clip-path 0.7s;
 }
 
 .btn-jelly:hover {
@@ -698,12 +679,11 @@ html {
 }
 
 .btn-jelly:hover:before {
-    top: -30px;
-    left: -30px;
+    clip-path: circle(150% at 100% 100%);
 }
 
 .btn-jelly:active:before {
-    background: #3a0ca3;
+    background: var(--navy-deep);
     transition: background 0s;
 }
 
@@ -713,6 +693,7 @@ html {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem 1.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .projects-header .section-title {
@@ -770,7 +751,6 @@ html {
     color: rgba(255, 255, 255, 0.75);
 }
 
-/* delete-confirmation popover ("bubble") — force site font, override browser/Tailwind default */
 .project-delete-modal {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }

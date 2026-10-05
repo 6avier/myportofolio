@@ -6,10 +6,6 @@
         return Math.random() * (max - min) + min;
     }
 
-    // Curated, evenly-spaced hues so any two picks read as genuinely
-    // different colors (a plain random hue could land two similar
-    // blues back to back). "last" is excluded so it never repeats
-    // on the very next hover either.
     var SPLAT_COLORS = [
         'hsl(355, 70%, 42%)', // red
         'hsl(28, 78%, 42%)',  // orange
@@ -28,8 +24,6 @@
         return color;
     }
 
-    // Random points around an ellipse sized to the label box, in the
-    // SVG's own pixel coordinate space so nothing distorts.
     function makeBlobPoints(w, h) {
         var cx = w / 2;
         var cy = h / 2;
@@ -47,8 +41,6 @@
         return pts;
     }
 
-    // Catmull-Rom -> cubic Bezier, closed loop: turns straight-line
-    // polygon points into a smooth, organic "ink splat" outline.
     function smoothClosedPath(pts) {
         var n = pts.length;
         var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1) + ' ';
@@ -71,8 +63,6 @@
         return d + 'Z';
     }
 
-    // Turns a plain "<span class='social-tip'>GitHub</span>" into
-    // a splat outline + label, once, at load time.
     function setupTip(tip) {
         var text = tip.textContent;
         tip.textContent = '';
@@ -90,8 +80,6 @@
         tip.appendChild(svg);
         tip.appendChild(label);
 
-        // Measure once — width/height are stable since the label text
-        // never changes and white-space stays nowrap.
         var w = tip.offsetWidth || 100;
         var h = tip.offsetHeight || 40;
         svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
@@ -106,8 +94,8 @@
         tip._splatPath.setAttribute('d', smoothClosedPath(makeBlobPoints(box.w, box.h)));
         tip._splatPath.setAttribute('stroke', randomSplatColor(tip));
 
-        var dx = randRange(-10, 10);   // stay close to the icon horizontally
-        var dy = randRange(-6, 16);    // can drift down and slightly over the icon
+        var dx = randRange(-10, 10);
+        var dy = randRange(-6, 16);
         var rotate = randRange(-6, 6);
 
         tip.style.transform = 'translate(calc(-50% + ' + dx.toFixed(1) + 'px), ' + dy.toFixed(1) + 'px) rotate(' + rotate.toFixed(1) + 'deg) scale(1)';

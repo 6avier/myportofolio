@@ -1,6 +1,5 @@
 from main.forms import ProjectForm, ExperienceForm
-from django.http import HttpResponse, JsonResponse
-from django.core import serializers
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from main.models import Experience, Education, Project, Skill
@@ -26,15 +25,10 @@ def show_main(request):
 
 
 def show_experience(request):
-    json_response = get_experience_json(request)
-
-    experiences = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    experiences = [experience.object for experience in experiences]
-
     context = {
         "name": "Kemas Xavier",
-        "experience_list": experiences,
         "can_edit": can_edit(request.user),
+        "form": ExperienceForm(),
     }
     return render(request, "experience.html", context)
 
@@ -77,8 +71,6 @@ def create_project(request):
     context = {"name": "Kemas Xavier", "form": form}
     return render(request, "project_form.html", context)
 
-# No @login_required here: it would redirect anonymous fetch() calls to the HTML
-# login page (status 200). A JSON 403 is easier for the JS to handle.
 @require_POST
 def create_project_ajax(request):
     if not request.user.is_superuser:
@@ -102,8 +94,6 @@ def get_projects_json(request):
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    # Built by hand (not serializers.serialize) so each item can say whether
-    # the *current* user starred it.
     data = []
     for project in projects:
         starred_by = [user.username for user in project.starred_by.all()]
@@ -136,10 +126,47 @@ def delete_project(request, id):
 
     return redirect("main:show_projects")
 
+@require_POST
+def create_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add experience."}, status=403)
+
+    form = ExperienceForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse(
+            {"message": "Invalid data.", "errors": form.errors.get_json_data()},
+            status=400,
+        )
+
+    experience = form.save()
+    return JsonResponse({"message": "Experience added successfully!", "id": str(experience.id)}, status=201)
+
+
 def get_experience_json(request):
-    experiences = Experience.objects.all()
-    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
-    return HttpResponse(experiences_json, content_type="application/json")
+    title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.prefetch_related("starred_by").all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
+
+    data = []
+    for experience in experiences:
+        starred_by = [user.username for user in experience.starred_by.all()]
+        data.append({
+            "id": str(experience.id),
+            "title": experience.title,
+            "description": experience.description,
+            "category": experience.category,
+            "category_display": experience.get_category_display(),
+            "thumbnail": experience.thumbnail,
+            "is_ongoing": experience.is_ongoing,
+            "starred_by": starred_by,
+            "star_count": len(starred_by),
+            "is_starred": request.user.is_authenticated and request.user.username in starred_by,
+        })
+
+    return JsonResponse(data, safe=False)
 
 
 @login_required(login_url="/login/")

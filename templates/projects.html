@@ -62,22 +62,11 @@
         document.getElementById("add-project-modal").hidePopover();
     }
 
-    // Show exactly one of: loading / error / empty / grid
     function displayPageSection({ loading = false, error = false, empty = false, grid = false }) {
         document.getElementById("projects-loading").classList.toggle("hide", !loading);
         document.getElementById("projects-error").classList.toggle("hide", !error);
         document.getElementById("projects-empty").classList.toggle("hide", !empty);
         projectsGrid.classList.toggle("hide", !grid);
-    }
-
-    // Turn HTML special characters into entities so data is shown as text, not parsed as HTML
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
     }
 
     function buildProjectCardElement(project) {
@@ -143,7 +132,6 @@
     }
 
     async function fetchProjects(title = "") {
-        // Cancel the previous request so a slow old response can't overwrite a newer one
         if (activeController) activeController.abort();
         activeController = new AbortController();
 
@@ -167,13 +155,11 @@
         fetchProjects(searchInput.value.trim());
     }
 
-    // Wait until the user pauses typing before hitting the server
     searchInput.addEventListener("input", function () {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(searchProjects, SEARCH_DEBOUNCE_DELAY);
     });
 
-    // Search button / Enter searches immediately
     searchForm.addEventListener("submit", function (e) {
         e.preventDefault();
         clearTimeout(searchDebounceTimer);
@@ -183,19 +169,12 @@
     const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
     const projectForm = document.getElementById("project-form");
 
-    // Read a cookie value by name (used to get Django's CSRF token)
-    function getCookie(name) {
-        const match = document.cookie.split("; ").find((row) => row.startsWith(name + "="));
-        return match ? decodeURIComponent(match.split("=")[1]) : null;
-    }
-
-    // The modal only exists for superusers, so projectForm is null for everyone else
     if (projectForm) {
         projectForm.addEventListener("submit", async function (event) {
             event.preventDefault();
 
             const submitButton = projectForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true; // avoid double-saving on repeated clicks
+            submitButton.disabled = true;
 
             try {
                 const response = await fetch(CREATE_PROJECT_ENDPOINT, {
@@ -203,7 +182,6 @@
                     headers: { "X-CSRFToken": getCookie("csrftoken") },
                     body: new FormData(projectForm),
                 });
-                // A non-JSON body (e.g. the HTML 403 page from a CSRF failure) becomes {}
                 const result = await response.json().catch(() => ({}));
 
                 if (response.ok) {
