@@ -235,6 +235,38 @@ class ExperienceCreateAjaxTest(RoleTestCase):
         self.assertEqual(Experience.objects.count(), 1)
 
 
+class ExperienceXssTest(RoleTestCase):
+    payload = '<img src="x" onerror="alert(1)">'
+
+    def setUp(self):
+        super().setUp()
+        self.login_as(self.owner)
+        self.ajax_url = reverse("main:create_experience_ajax")
+
+    def test_title_made_only_of_tags_is_rejected(self):
+        response = self.client.post(self.ajax_url, self.form_data(self.payload))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.json()["errors"])
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_description_made_only_of_tags_is_rejected(self):
+        data = {**self.form_data("Fine title"), "description": self.payload}
+        response = self.client.post(self.ajax_url, data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("description", response.json()["errors"])
+
+    def test_tags_are_stripped_from_text_that_has_other_content(self):
+        data = {**self.form_data("Hello <b>world</b>"), "description": "Did <i>real</i> work"}
+        self.assertEqual(self.client.post(self.ajax_url, data).status_code, 201)
+        saved = Experience.objects.get(title="Hello world")
+        self.assertEqual(saved.description, "Did real work")
+
+    def test_form_path_is_also_sanitized(self):
+        response = self.client.post(reverse("main:create_experience"), self.form_data(self.payload))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Experience.objects.count(), 1)
+
+
 class ExperienceStarTest(RoleTestCase):
     def test_toggle_adds_then_removes_the_star(self):
         self.login_as(self.regular)
