@@ -150,3 +150,36 @@ Lalu buka `/admin/`, tambahkan grup `Editor` di **Groups**, dan masukkan akun bi
 - Test dan README ini.
 
 **Keterbatasan:** contoh kode tutorial harus disesuaikan ke proyek saya (id integer, nama file, dan block template berbeda). Test pertama yang ditulis AI juga sempat punya celah (tombol Delete untuk Editor tidak terdeteksi), yang baru ketahuan setelah kodenya sengaja dirusak untuk menguji test-nya.
+
+
+### Tugas 5
+
+Bagian Experience sekarang dimuat dan ditambah lewat AJAX, memakai pola yang sama dengan halaman Projects dari Tutorial 05.
+
+- **Daftar lewat AJAX:** halaman hanya merender kerangka, lalu `fetch()` mengambil `/experience/json/`. JSON disusun manual dengan `JsonResponse` (termasuk `star_count`, `is_starred`, dan daftar username), dengan tampilan loading, kosong, dan error.
+- **Pencarian:** berdasarkan judul tanpa reload, dengan debouncing 300 ms.
+- **Tambah lewat modal:** form ada di modal (Popover API). View `create_experience_ajax` memakai `ModelForm`, membalas 201, 400 (beserta error per field), atau 403, dan hanya pemilik (superuser) yang boleh. Token CSRF dikirim lewat header `X-CSRFToken`.
+- **Toast:** muncul saat berhasil dan saat gagal, termasuk pesan validasi dari server.
+- **XSS:** semua teks yang disisipkan lewat JavaScript melewati `escapeHtml` (di `static/js/utils.js`), dan `ExperienceForm` membuang tag HTML dengan `strip_tags` di `clean_title` dan `clean_description`.
+
+Tidak ada migrasi baru. Menjalankan proyek tetap seperti di Tugas 4.
+
+1. **Debouncing** adalah teknik menunda sebuah fungsi sampai tidak ada event baru selama jeda waktu tertentu. Setiap event baru membatalkan timer sebelumnya lalu memulainya lagi. Pada pencarian AJAX ini penting karena tanpa debouncing, setiap huruf yang diketik mengirim satu request ke server. Mengetik "compfest" berarti 8 request, padahal hanya hasil yang terakhir yang dibutuhkan. Dengan debouncing 300 ms, request hanya dikirim setelah pengguna berhenti mengetik, sehingga beban server berkurang, tampilan tidak berkedip, dan hasil lama tidak menimpa hasil baru.
+
+2. **`await`** membuat fungsi `async` berhenti sementara sampai Promise dari `fetch()` selesai, lalu memberikan nilai hasilnya (objek `Response`). Tanpa `await`, variabel hanya berisi Promise yang masih pending. Kode di bawahnya langsung jalan sebelum data tiba, sehingga `response.ok` atau `response.json()` tidak bekerja seperti yang diharapkan. Daftar juga bisa tampil kosong karena dirender sebelum datanya ada, dan error dari `fetch()` tidak tertangkap oleh `try/catch`.
+
+3. **XSS (Cross-Site Scripting)** adalah serangan ketika penyerang menyisipkan JavaScript miliknya ke halaman yang kemudian dijalankan di browser pengguna lain, misalnya lewat judul `<img src="x" onerror="alert(1)">` yang tersimpan di database. Template Django otomatis meng-escape `{{ variabel }}`, jadi `<` dan `>` menjadi `&lt;` dan `&gt;` dan tampil sebagai teks. Saat data dirakit di JavaScript dan dipasang lewat `innerHTML`, tidak ada lagi lapisan escaping otomatis tersebut. String dari JSON diperlakukan sebagai HTML mentah dan tag di dalamnya dijalankan browser. Karena itu setiap nilai harus di-escape secara manual (`escapeHtml` atau `textContent`), dan server ikut membersihkan input (`strip_tags`) sebagai lapisan kedua.
+
+### Penggunaan AI
+
+**Tools:** Claude (Claude Code), model Claude Sonnet 5.
+
+**Strategi prompting:** Saya meminta AI menjelaskan konsep dan memberikan arahan langkah demi langkah, lalu saya mengetik dan mengerjakan kodenya sendiri. Jika ada error, saya memberikan pesan error dan meminta penjelasan penyebabnya.
+
+**Bagian yang dibantu:**
+
+- Tutorial 05 pada Projects (toast, AJAX, debouncing, modal, `escapeHtml`, dan `strip_tags`).
+- Penerapan pola yang sama pada Experience, termasuk `static/js/utils.js` dan `create_experience_ajax`.
+- Test dan README ini.
+
+**Keterbatasan:** contoh kode tutorial harus disesuaikan ke proyek saya, misalnya model `Experience` memakai id UUID dan field-nya berbeda dari `Project`. AI juga sempat merusak `main/tests.py` karena skrip penggantian teksnya salah menangani karakter escape. Itu ketahuan dari jumlah test yang turun dari 28 menjadi 23, lalu file dikembalikan dari Git dan ditulis ulang. Tampilan tombol Add Experience yang tertutup logo juga baru diperbaiki setelah saya minta.
