@@ -28,6 +28,7 @@ def show_experience(request):
     context = {
         "name": "Kemas Xavier",
         "can_edit": can_edit(request.user),
+        "form": ExperienceForm(),
     }
     return render(request, "experience.html", context)
 

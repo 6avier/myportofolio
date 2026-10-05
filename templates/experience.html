@@ -8,7 +8,7 @@
         <div class="projects-header">
             <h1 class="section-title ransom-text ransom-ink">Experience</h1>
             {% if user.is_superuser %}
-            <a href="{% url 'main:create_experience' %}" class="btn-jelly">+ Add Experience</a>
+            <button type="button" class="btn-jelly" popovertarget="add-experience-modal">+ Add Experience</button>
             {% endif %}
         </div>
 
@@ -35,6 +35,10 @@
     </div>
 </section>
 
+{% if user.is_superuser %}
+{% include "components/experience_form_modal.html" with form=form %}
+{% endif %}
+
 <script>
     const EXPERIENCE_ENDPOINT = "{% url 'main:get_experience_json' %}";
     const ID_PLACEHOLDER = "00000000-0000-0000-0000-000000000000";
@@ -53,6 +57,10 @@
     const SEARCH_DEBOUNCE_DELAY = 300;
     let searchDebounceTimer;
     let activeController = null;
+
+    function closeExperienceModal() {
+        document.getElementById("add-experience-modal").hidePopover();
+    }
 
     function displayPageSection({ loading = false, error = false, empty = false, grid = false }) {
         document.getElementById("experience-loading").classList.toggle("hide", !loading);
