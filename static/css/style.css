@@ -495,6 +495,72 @@ html {
     color: var(--paper);
 }
 
+.nav-links {
+    display: contents;
+}
+
+.nav-menu-button {
+    display: none;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.7rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    anchor-name: --nav-menu-button;
+}
+
+.nav-menu {
+    position: fixed;
+    inset: auto;
+    top: 4rem;
+    left: 1rem;
+    margin: 0;
+    min-width: 11rem;
+    padding: 0.5rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
+.nav-menu:popover-open {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-menu a {
+    padding: 0.6rem 0.8rem;
+    color: var(--ink);
+    font-size: 1rem;
+    text-decoration: none;
+    border-radius: var(--radius);
+}
+
+.nav-menu a:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+}
+
+@supports (position-anchor: --nav-menu-button) {
+    .nav-menu {
+        position-anchor: --nav-menu-button;
+        top: calc(anchor(bottom) + 0.4rem);
+        left: anchor(left);
+    }
+}
+
+@media (min-width: 601px) {
+    .nav-menu {
+        display: none !important;
+    }
+}
+
 @media (max-width: 900px) {
     .section-block {
         grid-column: 1 / -1 !important;
@@ -531,21 +597,38 @@ html {
 }
 
 @media (max-width: 600px) {
+    .nav-links {
+        display: none;
+    }
+
+    .nav-menu-button {
+        display: inline-flex;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
     .site-header .container {
         display: grid;
         grid-template-columns: 7rem 1fr;
-        align-items: start;
+        align-items: center;
         gap: 0.75rem;
     }
 
     .site-header nav {
-        justify-content: flex-start;
-        gap: 0.35rem 0.9rem;
-        font-size: 0.85rem;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.7rem;
     }
 
-    .site-header nav a {
-        font-size: 0.85rem;
+    .site-header nav > a,
+    .nav-user {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .site-header .nav-menu a {
+        font-size: 0.95rem;
     }
 
     .section {
@@ -1035,4 +1118,30 @@ html {
 
 .project-form-modal .project-form > .button {
     align-self: auto;
+}
+
+@media (max-width: 380px) {
+    .site-header .container {
+        grid-template-columns: 5.5rem 1fr;
+        gap: 0.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .site-header nav {
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .experience-thumb {
+        top: -1rem;
+        right: 0.75rem;
+        width: 3.75rem;
+        height: 3.75rem;
+    }
+
+    .experience-card:has(.experience-thumb) h2 {
+        padding-right: 4.25rem;
+    }
 }

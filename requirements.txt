@@ -12,3 +12,4 @@ typing_extensions==4.16.0
 urllib3==2.6.3
 whitenoise==6.11.0
 django==5.2
+djangorestframework~=3.18.3

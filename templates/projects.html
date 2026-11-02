@@ -40,23 +40,28 @@
 {% include "components/project_form_modal.html" with form=form %}
 {% endif %}
 
+{% csrf_token %}
 <script>
     // Configuration
-    const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
-    const STAR_URL_TEMPLATE = "{% url 'main:toggle_star' 0 %}";
-    const DELETE_URL_TEMPLATE = "{% url 'main:delete_project' 0 %}";
+    const BASE_PROJECTS_ENDPOINT = "{% url 'api:project-list' %}";
+    const DETAIL_PROJECT_ENDPOINT = "{% url 'api:project-detail' 0 %}";
+    const STAR_PROJECT_ENDPOINT = "{% url 'api:project-star' 0 %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
-    const CSRF_TOKEN = "{{ csrf_token }}";
 
     const searchForm = document.getElementById("project-search-form");
     const searchInput = document.getElementById("search-input");
     const projectsGrid = document.getElementById("projects-grid");
+    const projectForm = document.getElementById("project-form");
 
     const SEARCH_DEBOUNCE_DELAY = 300;
     let searchDebounceTimer;
 
     let activeController = null;
+
+    function projectEndpoint(pattern, id) {
+        return pattern.replace("/0/", `/${id}/`);
+    }
 
     function closeProjectModal() {
         document.getElementById("add-project-modal").hidePopover();
@@ -76,20 +81,19 @@
             ? `<a href="${escapeHtml(project.demo_url)}" target="_blank" rel="noopener noreferrer">Live Demo</a>` : "";
 
         const starTitle = project.star_count
-            ? `Starred by ${escapeHtml(project.starred_by.join(", "))}` : "Be the first to star this";
-        const starForm = IS_AUTHENTICATED ? `
-            <form method="post" action="${STAR_URL_TEMPLATE.replace("/0/", `/${project.id}/`)}" class="star-form">
-                <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF_TOKEN}">
-                <button type="submit"
+            ? `Starred by ${escapeHtml(project.starred_by_names)}` : "Be the first to star this";
+        const starButton = IS_AUTHENTICATED ? `
+            <div class="star-form">
+                <button type="button"
                         class="button button-star${project.is_starred ? " is-starred" : ""}"
+                        data-action="star" data-id="${escapeHtml(project.id)}"
                         title="${starTitle}">
                     <span aria-hidden="true">★</span>
                     ${project.is_starred ? "Unstar" : "Star"}
                     <span class="star-count">${project.star_count}</span>
                 </button>
-            </form>` : "";
+            </div>` : "";
 
-        const deleteUrl = DELETE_URL_TEMPLATE.replace("/0/", `/${project.id}/`);
         const deleteModal = IS_SUPERUSER ? `
             <p class="experience-status">
                 <button type="button" class="button button-danger"
@@ -110,10 +114,8 @@
                     <div class="project-delete-modal__actions">
                         <button type="button" class="button button-secondary"
                                 popovertarget="delete-project-${project.id}" popovertargetaction="hide">Cancel</button>
-                        <form method="post" action="${deleteUrl}">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF_TOKEN}">
-                            <button type="submit" class="button button-danger">Yes, Delete</button>
-                        </form>
+                        <button type="button" class="button button-danger"
+                                data-action="delete" data-id="${escapeHtml(project.id)}">Yes, Delete</button>
                     </div>
                 </div>
             </div>` : "";
@@ -126,7 +128,7 @@
             <p class="experience-description">${escapeHtml(project.role)}</p>
             <p class="experience-description">${escapeHtml(project.description)}</p>
             <div class="entry-links">${githubLink}${demoLink}</div>
-            ${starForm}
+            ${starButton}
             ${deleteModal}`;
         return card;
     }
@@ -137,18 +139,44 @@
 
         displayPageSection({ loading: true });
         try {
-            const url = `${BASE_PROJECTS_ENDPOINT}?title=${encodeURIComponent(title)}`;
-            const response = await fetch(url, { signal: activeController.signal });
+            const url = new URL(BASE_PROJECTS_ENDPOINT, window.location.origin);
+            if (title) url.searchParams.set("title", title);
+            const response = await fetch(url, {
+                headers: { Accept: "application/json" },
+                signal: activeController.signal,
+            });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const projects = await response.json();
 
-            projectsGrid.innerHTML = "";
-            projects.forEach((project) => projectsGrid.appendChild(buildProjectCardElement(project)));
+            projectsGrid.replaceChildren(...projects.map(buildProjectCardElement));
             displayPageSection(projects.length ? { grid: true } : { empty: true });
         } catch (err) {
             if (err.name === "AbortError") return;
+            console.error(err);
             displayPageSection({ error: true });
         }
+    }
+
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data).flat().filter((value) => typeof value === "string");
+        return messages.join(" ") || `Request failed (HTTP ${status}).`;
+    }
+
+    // One place for POST/PUT/PATCH/DELETE: JSON body, CSRF header and error handling.
+    async function writeProject(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        return data;
     }
 
     function searchProjects() {
@@ -166,9 +194,6 @@
         searchProjects();
     });
 
-    const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
-    const projectForm = document.getElementById("project-form");
-
     if (projectForm) {
         projectForm.addEventListener("submit", async function (event) {
             event.preventDefault();
@@ -177,29 +202,44 @@
             submitButton.disabled = true;
 
             try {
-                const response = await fetch(CREATE_PROJECT_ENDPOINT, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": getCookie("csrftoken") },
-                    body: new FormData(projectForm),
-                });
-                const result = await response.json().catch(() => ({}));
-
-                if (response.ok) {
-                    projectForm.reset();
-                    closeProjectModal();
-                    showToast("Success", result.message, "success");
-                    fetchProjects(searchInput.value.trim());
-                } else {
-                    const fieldErrors = Object.values(result.errors || {}).flat().map((e) => e.message);
-                    showToast("Failed", fieldErrors[0] || result.message || "Something went wrong.", "error");
-                }
+                const fields = new FormData(projectForm);
+                const payload = Object.fromEntries(
+                    ["title", "role", "description", "year"].map((name) => [name, fields.get(name)])
+                );
+                // Optional URL fields are nullable, so send null instead of an empty string.
+                ["github_url", "demo_url"].forEach((name) => { payload[name] = fields.get(name) || null; });
+                await writeProject(BASE_PROJECTS_ENDPOINT, "POST", payload);
+                projectForm.reset();
+                closeProjectModal();
+                showToast("Success", "Project added successfully!", "success");
+                await fetchProjects(searchInput.value.trim());
             } catch (err) {
-                showToast("Failed", "Could not reach the server.", "error");
+                showToast("Could not add project", err.message, "error");
             } finally {
                 submitButton.disabled = false;
             }
         });
     }
+
+    // Event delegation: works for buttons rendered after every refetch.
+    projectsGrid.addEventListener("click", async function (event) {
+        const button = event.target.closest("button[data-action]");
+        if (!button || button.disabled) return;
+
+        const action = button.dataset.action;
+        button.disabled = true;
+        try {
+            const pattern = action === "star" ? STAR_PROJECT_ENDPOINT : DETAIL_PROJECT_ENDPOINT;
+            await writeProject(projectEndpoint(pattern, button.dataset.id),
+                action === "star" ? "POST" : "DELETE");
+            if (action === "delete") showToast("Success", "Project deleted successfully!", "success");
+            await fetchProjects(searchInput.value.trim());
+        } catch (err) {
+            showToast("Request failed", err.message, "error");
+        } finally {
+            button.disabled = false;
+        }
+    });
 
     fetchProjects(searchInput.value.trim());
 </script>
